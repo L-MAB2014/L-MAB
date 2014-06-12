@@ -8,7 +8,7 @@ import lejos.nxt.comm.Bluetooth;
 
 public class BTReceive {
 	public static void main(String [] args)  throws Exception {
-        String showMe = "Waiting...";
+        String showMe = "";
         
 		while(true) {
 			LCD.clear();
@@ -23,13 +23,13 @@ public class BTReceive {
 			LCD.drawString(showMe, 0, 1);
 			LCD.refresh();
 			
-			dos.writeUTF("String ("+showMe+") Received!");
+			dos.writeUTF(showMe);
 			dos.flush();
 			
 			dis.close();
 			dos.close();
 			btc.close();
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		}
 	}
 }

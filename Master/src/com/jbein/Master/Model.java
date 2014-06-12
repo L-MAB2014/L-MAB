@@ -4,6 +4,6 @@ public class Model {
 	public String str;
 	
 	Model() {
-		str = "Hallo!!!";
+		str = "";
 	}
 }
