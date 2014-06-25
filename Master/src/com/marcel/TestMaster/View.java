@@ -33,6 +33,8 @@ public class View extends JFrame{
 	
 	JTextArea dialog;
 	
+	JScrollPane dialog_scroll;
+	
 	View()
 	{
 		super("Master");
@@ -54,6 +56,7 @@ public class View extends JFrame{
 
 		
 		this.dialog = new JTextArea();
+		this.dialog_scroll = new JScrollPane(dialog);
 		
 		this.panel_connect.add(this.btn_connect);
 		
@@ -86,10 +89,10 @@ public class View extends JFrame{
 		this.add(this.panel_selection);
 		
 		this.add(this.btn_send);
-		this.add(this.dialog);
+		this.add(this.dialog_scroll);
 		
 		this.SetModus(false);
-		
+		this.dialog.setEnabled(false);
 
 		pack();
 		setVisible(true);
@@ -98,8 +101,7 @@ public class View extends JFrame{
 	
 	public void SetModus(boolean modus)
 	{
-		this.btn_send.setEnabled(modus);
-		this.dialog.setEnabled(modus);
+		this.btn_send.setEnabled(modus);	
 		this.store_blue.setEnabled(modus);
 		this.store_green.setEnabled(modus);
 		this.store_yellow.setEnabled(modus);
@@ -119,7 +121,9 @@ public class View extends JFrame{
 	
 	public synchronized void InputDialog(String text)
 	{
-		this.dialog.insert(text+"\n", 0);
+	//	this.dialog.insert(text+"\n", 0);
+		this.dialog.append(text+"\n");
+		this.dialog.setCaretPosition(this.dialog.getDocument().getLength());
 	}
 	
 	public void addBTNConnectListener(ActionListener listenForCalcButton)
