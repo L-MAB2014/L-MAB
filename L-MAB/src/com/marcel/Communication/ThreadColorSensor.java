@@ -53,7 +53,6 @@ public class ThreadColorSensor extends Thread {
 	  {	 
 		
 		try {
-				LCD.drawString("START", 0, 4);
 				this.threadRun = true;
 				this.threadEnds = false;
 				

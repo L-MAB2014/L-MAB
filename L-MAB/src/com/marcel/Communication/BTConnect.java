@@ -25,9 +25,12 @@ public class BTConnect {
 	
 	private boolean isConnect;
 	
-	BTConnect()
+	private OrderManagement manager;
+	
+	BTConnect(OrderManagement manager)
 	{
 		this.isConnect = false;
+		this.manager = manager;
 	}
 	
 	
@@ -84,18 +87,9 @@ public class BTConnect {
 	}
 	
 	private void FullMessage(String message)
-	{
-		LCD.clear();
-		List<Message> l = Protokoll.StringToMessage(message);				
-		LCD.drawString(message, 0, 1);
-		LCD.drawString("List: "+l.size(), 0, 2);
-		for(int i = 0; i < l.size();++i)
-		{
-			Message m = l.get(i);
-			LCD.drawString(m.getKey()+" = "+m.getValue(), 0, i+4);
-		}
-		
-		LCD.refresh();
+	{							
+		this.manager.addOrder(Protokoll.StringToMessage(message));
+
 	}
 	
 	
@@ -172,7 +166,6 @@ public class BTConnect {
 			try {
 				 long lastsend = System.currentTimeMillis();
 				 				 
-				 LCD.drawString("GESTARTET", 0, 2);
 					while(!this.disconnect )
 				    {
 						if((System.currentTimeMillis()-lastsend)>5000)
@@ -183,10 +176,8 @@ public class BTConnect {
 							dos.flush();
 						
 							lastsend = System.currentTimeMillis();
-							LCD.drawString("GESENDET ", 0, 1);
 						}
 			    	}
-					LCD.drawString("BEENDET", 0, 2);
 				
 			 } catch (Exception e) {
 					
