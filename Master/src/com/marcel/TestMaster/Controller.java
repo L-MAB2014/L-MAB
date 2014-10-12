@@ -5,138 +5,138 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Controller {
+public class Controller implements IController {
 	
-	private View view;
-	private BT bt;
-	private InputChannel input;
+	private View2 view;
 	
-	private boolean connect;
+	private List<Bot> bots;
 	
+	private Controller controller;
+	
+	private int order_ID;
+	
+			
 	Controller()
 	{
-		this.view = new View();
-		this.view.addBTNConnectListener(new addBTNConnectListener());
-		this.view.addBTNSendListener(new addBTNSendListener());
+		this.controller = this;
+		this.order_ID =0;
+		this.view = new View2();
+		this.view.addControlBotListener(new ControlBotListener());
+		this.view.addNewBotListener(new NewBotListener());
+		this.view.addConrtolOrderListener(new ControlOrderListener());
+		this.view.addNewOrderListener(new NewOrderListener());
+		this.view.addStoppListener(new StoppListener());
 		
-		this.bt = new BT();
+		this.bots = new ArrayList<Bot>();
+							
 		
-		this.input = new InputChannel();
-		
-		this.connect =false;
 	}
-	
-	public Message GetStoreSelection()
+		
+	public void InputConsole( String text)
 	{
-		if(this.view.store_blue.isSelected())
-			return new Message("S","1");
-		else if(this.view.store_green.isSelected())
-			return new Message("S","2");
-		else if(this.view.store_yellow.isSelected())
-			return new Message("S","3");
-		else
-			return null;
+		view.InputDialog(text);
+	}
+	 
+	
+	public void UpdateTable( int row, String [] text)
+	{
+		view.UpdateTable(row, text);
 	}
 	
+	public boolean ExitsBot (String name)
+	{
+		for(int i = 0 ; i < this.bots.size(); ++i)
+		{
+			if(name.equals(this.bots.get(i).getBt_Name()))
+				return true;
+		}
+		return false;
+	}
 	
-	public Message GetExitSelection() 
-    {					
-		if(this.view.exit_orange.isSelected())
-			return new Message("E","1");
-		else if(this.view.exit_pink.isSelected())
-			return new Message("E","2");
-		else
-			return null;		
-		
-    } 
-	
-		
-    
-    class addBTNConnectListener implements ActionListener {
+    class ControlBotListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
+
+        	InputConsole("Der Bots-Verwalten-Button wurde betätigt");
+        }
+    }
+    
+    class NewBotListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+
+        	String bot_name = view.GetBotName();
         	
-        	view.btn_connect.setEnabled(false);
-        	if(!connect)
-	        {	
-	        	view.InputDialog("Verbindungsaufbau wird gestartet");
-	        		        	
-	        	if(bt.ConnectAgent())
+        	if(bot_name.trim().length() != 0)
+        	{
+	        	if(!ExitsBot(bot_name))
 	        	{
-	        		connect = true;
-	        		view.SetModus(true);
-	        		input.start();
-	        		view.InputDialog("Verbindung hergestellt!");
+        			Bot bot = new Bot(controller,bot_name, bots.size());
+        			view.InputTable(new String [] {""+bots.size(),bot_name,"","","",""});
+        			
+	        		if(bot.Connect())
+	        		{	        			
+	            		bot.InfoUpdate();
+	        			bots.add(bot);
+	        			
+	        		}else
+	        		{
+	        			view.DeleteFromTable(bots.size());
+	        			InputConsole("Fehlermeldung konnte keine Verbindung hergestellt werden");
+	        			//Fehlermeldung konnte keine Verbindung hergestellt werden
+	        		}
 	        	}else
 	        	{
-	        		view.InputDialog("KEINE Verbindung");
+	        		InputConsole("Bot mit dem Namen existiert bereits!");
 	        	}
-	        		        		        	
-	        }else
-	        {
-	        	view.InputDialog("Verbindung trennen");
-	        	connect = false;
-	        	bt.CloseAgent();
-	        	view.SetModus(false);
-	        	view.InputDialog("Verbindung getrennt");
-	        	
-	        }
-        	view.btn_connect.setEnabled(true);
-	        
-	       
+        	}else
+        	{
+        		InputConsole("Fehlermeldung : Keine Eingabe");
+        		//Fehlermeldung : Keine Eingabe
+        	}
+        	
+        	
         }
     }
     
-    class addBTNSendListener implements ActionListener {
+    class ControlOrderListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-        	
-        	Message store = GetStoreSelection();
-        	Message exit = GetExitSelection();
-        	        	
-        	if(store != null && exit != null)
+
+        	InputConsole("Der Aufträge-Verwalten-Button wurde betätigt");
+        }
+    }
+    
+    class NewOrderListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+
+        	int store = view.GetStoreSelection();
+        	int exit = view.GetExitSelection();
+        	        	        	
+        	if(store != 0 && exit != 0)
         	{
-        		List <Message> list = new ArrayList<Message>();
-        		list.add(store);
-        		list.add(exit);
+        		int id = order_ID++;
+        		     		
+        		Order new_order = new Order(id,store,exit);
         		
-        		String message= Protokoll.MessageToString(list);
-		    	if(bt.SendMessage(message))
-		    		view.InputDialog("Nachricht "+message+" wurde erfolgreich gesendet");
-		    	else
-		    		view.InputDialog("Fehler beim senden der Nachricht "+message);
+        		if(bots.size() >0)
+        		{
+        			bots.get(0).NewOrder(new_order);
+        		}else
+        		{
+        			view.InputDialog("Keine Bots vorhanden");
+        		}
+        		
         	}else
         		view.InputDialog("Lager und Ausgang wählen!");
-        	
+        	       
         }
     }
     
-    private class InputChannel extends Thread {
-    			
-		public void run()
-		  {	 
-			     
-			try {
-					System.out.println("Input-Cahnnel gestartet");
-				 	while(connect)
-				 	{
-				 		String message = bt.MessageFromAgent();
-				 		if(message != null && message != "")
-				 		{
-				 			view.InputDialog(message);
-				 		}			
-				 	
-				 	}
-				 	
-			 } catch (Exception e) {
-					
-				 System.out.println(e);
-			 }
-			System.out.println("Input-Cahnnel beendet");
-						
-		  }		
-		
-	}
-    
-    
+    class StoppListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+
+        	InputConsole("Der Stopp-Button wurde betätigt");
+        }
+    }
+         
     public static void main(String [] args)
 	{
 		new Controller();

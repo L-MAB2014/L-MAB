@@ -45,7 +45,7 @@ public class BTConnect {
 			this.dos = btc.openDataOutputStream();
 			LCD.drawString("VERBUNDEN", 0, 1);
 			this.input.start();
-			this.output.start();
+		//	this.output.start();
 			
 			this.isConnect = true;
 			
@@ -64,7 +64,7 @@ public class BTConnect {
 	{
 		try {
 			this.input.CloseInput();
-			this.output.CloseInput();
+		//	this.output.CloseInput();
 			this.dos.close();
 			this.dis.close();
 			this.btc.close();
@@ -90,6 +90,19 @@ public class BTConnect {
 	{							
 		this.manager.addOrder(Protokoll.StringToMessage(message));
 
+	}
+	
+	public synchronized void SendPosition(String m)
+	{
+		try{
+			m += "#";
+			dos.write(m.getBytes());
+			dos.flush();
+			
+		}catch(Exception e)
+		{
+			
+		}
 	}
 	
 	

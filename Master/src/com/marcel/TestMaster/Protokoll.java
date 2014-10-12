@@ -7,20 +7,22 @@ import java.util.*;
 public class Protokoll {
 	
 	
-	public static String MessageToString(List <Message> message)
+	public static String MessageToString(Order order)
 	{
-		String m = "";
-		
-		for(int i =0 ; i < message.size(); ++i)
-		{
-			m += message.get(i).getKey()+":"+message.get(i).getValue();
-			
-			if((i+1) < message.size())
-				m+=";";
-		}
-		m +="#";
-		
-		return m;
+//		String m = "";
+//		
+//		for(int i =0 ; i < message.size(); ++i)
+//		{
+//			m += message.get(i).getKey()+":"+message.get(i).getValue();
+//			
+//			if((i+1) < message.size())
+//				m+=";";
+//		}
+//		m +="#";
+//		
+//		return m;
+				
+		return String.format("ID:%s;S:%s;E:%s#", order.getId(), order.getStore_place(), order.getExit_place());
 	}
 	
 	public static List StringToMessage(String message)

@@ -22,6 +22,11 @@ public class ThreadColorSensor extends Thread {
 	 */
 	private int colorID;
 	
+	/**
+	 * 
+	 */
+	private int lightID;
+	
 	
 	/**
 	 * 
@@ -43,6 +48,7 @@ public class ThreadColorSensor extends Thread {
 	{
 		this.colorSensor = cs;
 		this.colorID = -99;
+		this.lightID =0;
 	}
 	
 	
@@ -59,6 +65,7 @@ public class ThreadColorSensor extends Thread {
 				while( !this.threadEnds )
 			    {
 	    			this.colorID = this.colorSensor.getColorID();
+	    			this.lightID = this.colorSensor.getLightValue();
 					this.sleep(20);
 		    	}
 				
@@ -103,9 +110,17 @@ public class ThreadColorSensor extends Thread {
 	/**
 	 * @return
 	 */
-	public int getID()
+	public int getColorID()
 	{
 		return this.colorID;
+	}
+	
+	/**
+	 * @return
+	 */
+	public int getLightID()
+	{
+		return this.lightID;
 	}
 	
 	/**
