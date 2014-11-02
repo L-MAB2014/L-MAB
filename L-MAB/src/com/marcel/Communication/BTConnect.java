@@ -20,32 +20,28 @@ public class BTConnect {
 	private DataOutputStream dos;
 	
 	private InputChannel input;
-	
-	private OutputChannel output;
-	
+		
 	private boolean isConnect;
 	
-	private OrderManagement manager;
+	private IRoboter roboter;
 	
-	BTConnect(OrderManagement manager)
+	BTConnect(IRoboter robo)
 	{
 		this.isConnect = false;
-		this.manager = manager;
+		this.roboter = robo;
 	}
 	
 	
 	public boolean Connection()		
 	{
 		try{
-			LCD.drawString("WAITE..", 0, 1);
+			LCD.drawString("WAIT..", 0, 1);
 			this.input = new InputChannel();
-		 	this.output= new OutputChannel();
 			this.btc = Bluetooth.waitForConnection();
 			this.dis = btc.openDataInputStream();
 			this.dos = btc.openDataOutputStream();
 			LCD.drawString("VERBUNDEN", 0, 1);
 			this.input.start();
-		//	this.output.start();
 			
 			this.isConnect = true;
 			
@@ -64,7 +60,6 @@ public class BTConnect {
 	{
 		try {
 			this.input.CloseInput();
-		//	this.output.CloseInput();
 			this.dos.close();
 			this.dis.close();
 			this.btc.close();
@@ -80,17 +75,11 @@ public class BTConnect {
 	private void ResetForNewStart()
 	{
 		this.input = null;
-		this.output = null;
 		this.btc = null;
 		this.dis = null;
 		this.dos = null;
 	}
 	
-	private void FullMessage(String message)
-	{							
-		this.manager.addOrder(Protokoll.StringToMessage(message));
-
-	}
 	
 	public synchronized void SendPosition(String m)
 	{
@@ -137,7 +126,7 @@ public class BTConnect {
 							{
 								if(c == '#')
 								{
-									FullMessage(message);
+									roboter.InputMessage(message);
 									message= "";
 								}else
 								{
@@ -163,47 +152,5 @@ public class BTConnect {
 		}
 	}
 	
-	
-	private class OutputChannel extends Thread {
-					
-		private boolean disconnect;
-		
-		OutputChannel()
-		{
-			disconnect = false;
-		}
-		
-		public void run()
-		  {	 
-			     
-			try {
-				 long lastsend = System.currentTimeMillis();
-				 				 
-					while(!this.disconnect )
-				    {
-						if((System.currentTimeMillis()-lastsend)>5000)
-						{
-							String m1 = "HUNTER#";
-
-							dos.write(m1.getBytes());
-							dos.flush();
-						
-							lastsend = System.currentTimeMillis();
-						}
-			    	}
-				
-			 } catch (Exception e) {
-					
-				 LCD.drawString(""+e, 0, 1);
-			 }
-			
-			
-		  }
-		
-		public void CloseInput()
-		{
-			this.disconnect=true;
-		}
-	}
 
 }

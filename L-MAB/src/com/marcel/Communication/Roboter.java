@@ -2,6 +2,9 @@ package com.marcel.Communication;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lejos.nxt.Button;
 import lejos.nxt.ButtonListener;
 import lejos.nxt.ColorSensor;
@@ -13,70 +16,72 @@ import lejos.nxt.SensorPort;
 import lejos.nxt.Sound;
 import lejos.nxt.UltrasonicSensor;
 import lejos.robotics.Color;
+import lejos.util.Delay;
 
-public class Roboter {
+public class Roboter implements IRoboter {
+	
+	private CheckpointList map;
+	
+	private Checkpoint park_Position;
+	
+	private Checkpoint position;
 	
 	private ColorSensor colorSensor;
-	
-	private UltrasonicSensor ultra ;
 	
 	private NXTRegulatedMotor rightMotor;
 	private NXTRegulatedMotor leftMotor;
 	
 	private BTConnect bt;
 	
-	private ThreadColorSensor thread_color;
-	
-	private ThreadUltraSensor thread_ultra;
-	
 	private OrderManagement manager;
 	
-	
-	private int tp = 150;		
-	private int light;			
-	private int high;		
-	private int low;		
-	private int offset;		
-	private int turn;		
-	private int kp;		
-	private int error;
-	
-	private int counter;
+	private boolean wait;
 	
 	private long last_checkpoint;
 	
-	private boolean IsExit;
+	float tp = 300;	
+	
+	float light;
+	
+	float high;		
+	float low;		
+	float offset;		
+	float error;
+	
+	float turn;
+		
+	float kp_init= (1.3f/185);
+	float kp=0;
+	
 	
 	private boolean IsEnding;
 	
+	private boolean IsParking;
 	
+	private boolean InitializePosition;
 	
+
 	Roboter()
 	{
-		
+		this.map = CreatCheckpoints.InitializeCheckpoints();
 		this.IsEnding = false;
-		this.IsExit = false;
-		this.counter = 0;		
-		this.last_checkpoint = 0;
+		this.wait = false;	
+		this.InitializePosition = false;		
 		
+		this.IsParking = true;
+		
+		this.last_checkpoint = 0;
 		this.manager = new OrderManagement();
 		
-		this.bt = new BTConnect(this.manager);
+		this.bt = new BTConnect(this);
 		
 		this.colorSensor = new ColorSensor(SensorPort.S1);
-		this.ultra = new UltrasonicSensor(SensorPort.S2);
 		
 		this.rightMotor = new NXTRegulatedMotor(MotorPort.C);
-		this.leftMotor = new NXTRegulatedMotor(MotorPort.A);	
-		
-		this.rightMotor.setAcceleration(3000);
-		this.leftMotor.setAcceleration(3000);	        
+		this.leftMotor = new NXTRegulatedMotor(MotorPort.A);	       
    
 		this.rightMotor.setSpeed(tp);
-		this.leftMotor.setSpeed(tp);			
-		
-		this.thread_color = new ThreadColorSensor(this.colorSensor);
-		this.thread_ultra = new ThreadUltraSensor(this.ultra);	
+		this.leftMotor.setSpeed(tp);						
 		
 		Button.ESCAPE.addButtonListener(new ButtonListener() {
 		      public void buttonPressed(Button b) {		        
@@ -86,16 +91,31 @@ public class Roboter {
 
 		      public void buttonReleased(Button b) {		    	  		       
 		      }
-		    });		
-			
+		    });				
 		this.drive();
 	}
+	
+	
+	private void InitializeStart()
+	{
+		LCD.clear();
+		LCD.drawString("Auf Zuweisung warten!", 0, 1);
+		
+		while(!this.InitializePosition)
+		{
+			try{
+				Thread.sleep(100);
+			}catch(Exception e)
+			{
+				
+			}
+		}
+	}
+	
 	
 	private void drive()
 	{
 		try{
-			this.thread_color.StartThreadSensor();
-			this.thread_ultra.StartThreadSensor();
 			
 			init();
 			
@@ -104,13 +124,12 @@ public class Roboter {
 			
 			if(this.bt.Connection())
 			{
+				this.InitializeStart();	
+				
 				while(!this.IsEnding)
 				{		
 
 					LCD.drawString("Aufträge: "+ this.manager.size()+"    ", 0, 4);
-					LCD.drawString("Abstand: "+ this.thread_ultra.GetAverageDistance()+"    ", 0, 5);
-					LCD.drawString("Farbe: "+ this.thread_color.ColorString()+"    ", 0, 6);
-					LCD.drawString("Licht: "+ this.thread_color.getLightID()+"    ", 0, 7);
 					
 					if(this.manager.size() > 0)
 					{
@@ -123,23 +142,19 @@ public class Roboter {
 						LCD.drawString("Modus:   Start ", 0, 7);
 												
 						this.MakeOrder(order);
-						
+																		
+						LCD.clear();						
+					}else
+					{
 						this.leftMotor.stop(true);
 						this.rightMotor.stop(true);	
-						
-						LCD.clear();
-						
-					}
+					}										
 				}
 				this.bt.Close();
 			}
 		}catch(Exception e)
 		{
 			
-		}finally
-		{
-			this.thread_color.StopThreadSensor();
-			this.thread_ultra.StopThreadSensor();
 		}
 
 	}
@@ -147,12 +162,11 @@ public class Roboter {
 	
 	void init(){
 		
-		 
 		LCD.drawString("HELL: ", 0, 0);
-	
+		
 		Button.waitForAnyPress();
 			 
-		high = this.thread_color.getLightID();
+		high = colorSensor.getLightValue();
 	 
         LCD.drawString("Hell: "+ high, 0, 0);			
      
@@ -163,7 +177,7 @@ public class Roboter {
      
         Button.waitForAnyPress();
          
-        low = this.thread_color.getLightID();		
+        low = colorSensor.getLightValue();		
      
         LCD.drawString("Dunkel: "+ low, 0, 0);
     
@@ -172,143 +186,324 @@ public class Roboter {
         LCD.clear();
          
         offset = (high + low)/2;       
-       
-        LCD.drawString("Mitte: "+ offset, 0, 0);
-      
-        kp = tp / (high-offset);        
-        if(kp<1)
-        	kp=1;
-                
-        LCD.drawString("KP: "+ kp, 0, 1);
+        kp = kp_init * offset;
+        LCD.drawString("Mitte: "+ offset, 0, 0);        
+        
         LCD.drawString("Init Fertig", 0, 2); 
         Button.waitForAnyPress();
-   	    LCD.clear();   	    		
+   	    LCD.clear();	    		
 	}
 	
 	private void MakeOrder(Order order)
 	{
-		LCD.drawString("Modus:   FAHRT ", 0, 7);
-		int target_store = 1;
-		int target_exit  = 1;
+		Checkpoint check_store = map.getCheckpoint("PL" + order.getStore_place());
+		Checkpoint check_exit  = map.getCheckpoint("PU" + order.getExit_place());
+
+	    boolean isLoaded = false;
+	    boolean left_curve = false;
+	    
+	    if( this.IsParking)
+	    {
+	    	this.Unparking();
+	    }
+	    
+	    Checkpoint nextCheckWay = position.getNext_WayCheckpoint();
+	    Checkpoint nextCheckOther = position.getNext_OtherCheckpoint();
+	    
+	    boolean b =true;
+	    
+	    while(nextCheckOther == null || nextCheckOther != this.park_Position || b)
+	    {
+	    	if( !isLoaded && nextCheckOther != null && nextCheckOther == check_store )
+	    	{
+	    		this.EntranceModus(nextCheckOther, nextCheckWay);
+	    		isLoaded = true;
+	    		left_curve = true;
+	    		
+	    		this.position = nextCheckWay;
+		    	nextCheckWay = position.getNext_WayCheckpoint();
+			    nextCheckOther = position.getNext_OtherCheckpoint();
+	    		
+	    	}else if( isLoaded && nextCheckOther != null && nextCheckOther == check_exit )
+	    	{
+	    		this.EntranceModus(nextCheckOther, nextCheckWay);
+	    		isLoaded = false;
+	    		left_curve = true;
+	    		
+	    		this.position = nextCheckWay;
+		    	nextCheckWay = position.getNext_WayCheckpoint();
+			    nextCheckOther = position.getNext_OtherCheckpoint();
+	    		
+	    	}
+	    	   
+	    	this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
+					new Message(RoboterData.code_NextCheckpoint, nextCheckWay.getName()));
+	    	
+	    	if(left_curve)
+		    {
+		    	left_curve = false;
+		    	this.links45();	
+		    }	
+	    	
+	    	this.fahreZu(this.position.getNext_WayCheckpoint().getColor());
+	    	
+		    			    		    	
+	    	this.position = nextCheckWay;
+	    	nextCheckWay = position.getNext_WayCheckpoint();
+		    nextCheckOther = position.getNext_OtherCheckpoint();   	     
+		    
+		    if(b)
+		    	b = false;
+	    	
+	    }
+	    
+	    if(manager.size() == 0)
+	    {
+	    	this.Parking();
+	    }
+	
+			
+	}
+	
+	private void Parking()
+	{
+		LCD.drawString("PARKEN!! ", 0, 2);
 		
-		if(order.getStore_place() == 2)
-			target_store=3;
-		if(order.getStore_place() == 3)
-			target_store=5;		
-		if(order.getExit_place() == 2)
-			target_exit=3;
+		this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
+				new Message(RoboterData.code_NextCheckpoint, this.park_Position.getName()));
 		
-		for(int i = 0 ; i < target_store; ++i)
-		{
-			this.fahreZu(Color.RED);
-			++this.counter; 			
-  			Sound.playTone(500,500,100); 
-  			//LCD.drawString("Checkpoint :"+counter, 0, 7);
-  			this.bt.SendPosition("Checkpoint "+ counter + " erreicht");
-		}
+		this.links90();
+		this.fahreZu(this.park_Position.getColor());
+		this.turn180();
 		
-		this.bt.SendPosition("Lagereingang erreicht");
-		LCD.drawString("Checkpoint:  EINGANG", 0, 7);
-		this.EntranceModus(true);
+		this.leftMotor.stop(true);
+		this.rightMotor.stop(true);
+		
+		this.position = this.park_Position;
+		
+		this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
+				new Message(RoboterData.code_ParkPosition, position.getName()));
+		
+		this.IsParking = true;
 		
 		
-		LCD.drawString("GELB", 0, 7);
-		this.fahreZu(Color.YELLOW);
-		Sound.playTone(500,500,100); 
-		this.bt.SendPosition("Gelber Checkpoint erreicht");
-		//UMSTELLUNG
+	}
+	
+	private void Unparking()
+	{				
+		this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
+				new Message(RoboterData.code_NextCheckpoint, position.getNext_WayCheckpoint().getName()));
 		
-		for(int i = 0 ; i < target_exit; ++i)
-		{
-			this.fahreZu(Color.RED);	
-			++this.counter; 			
-  			Sound.playTone(500,500,100); 
-  			//LCD.drawString("Checkpoint :"+counter, 0, 7);
-  			this.bt.SendPosition("Checkpoint "+ counter + " erreicht");
-		}
-		
-		this.EntranceModus(false);
-		
-		this.fahreZu(Color.YELLOW);
-		this.bt.SendPosition("Gelber Checkpoint erreicht");		
-		this.fahreZu(Color.BLACK);
-		counter =0;
-		
+    	this.fahreZu(this.position.getNext_WayCheckpoint().getColor());
+    	
+    	this.position = position.getNext_WayCheckpoint();
+    	
+    	this.links90();			
+		this.IsParking = false;
 	}
 	
 	
 	
-	private void fahreZu(int t){
+	private void CheckForContinue(Message check, Message next_check )
+	{
+		List<Message> message = new ArrayList<Message>();
+		message.add(check);
+		message.add(next_check);
+		
+		this.bt.SendPosition(Protokoll.MessageToString(message));
+		this.WaiteForOk();
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+	}
+	
+	private void SetParkPosition(Message message)
+	{
+		Checkpoint check = map.getCheckpoint(message.getValue());
+		LCD.drawString("PP: "+ message.getValue(), 0, 2);
+		if(check != null)
+		{
+			this.park_Position = check;
+			this.position = check;
+			
+			this.InitializePosition = true;
+		}
+	}
+	
+	private void fahreZu(int farbe)
+	{
 		
 		leftMotor.forward();
-		rightMotor.forward();		
-	
-		int farbe = this.thread_color.getColorID();
+		rightMotor.forward();						
 		
 		while(!this.IsEnding)
 		{			
-		  	if((System.currentTimeMillis()-this.last_checkpoint )>2000)			
-		  	{	if((farbe=this.thread_color.getColorID()) == t)
-				{
+			light = colorSensor.getLightValue();  
+			int f = this.colorSensor.getColorID();
+			
+			if((System.currentTimeMillis()-this.last_checkpoint )> 1000)			
+		  	{	
+		 
+				if(f == farbe)
+				{	
+					Sound.playTone(500,500,100);
 		  			this.last_checkpoint = System.currentTimeMillis();	
 			  		return;
 				}
 		  	}
+					  	  			
+			if(light>=high)
+				light=high;
+			if(light<=low)
+				light=low;
+     	
+			error=light-offset;
+					
+			turn = (kp * error);
 			
-			light = this.thread_color.getLightID();    
-		
-        	if(light>high)
-        		light=high;
-        	if(light<low)
-        		light=low;
-         	
-        	error=light-offset;
-        
-        	turn = kp * error;
-         	
-            if(turn>100)
-            	turn=100;
-            if(turn<-100)
-            	turn=-100;           
+			
+        if(turn>=tp)
+        	turn=tp-20;
+        if(turn<=-tp)
+        	turn=-tp+20;           
+            
+            LCD.drawString("Licht: "+ light, 0, 1);
+			LCD.drawString("Links: "+ (tp + turn), 0, 2);
+			LCD.drawString("Rechts: "+ (tp - turn), 0, 3);
+
         
             leftMotor.setSpeed(tp + turn);
-            rightMotor.setSpeed(tp - turn);
-            
-                	
-		}	 					
+            rightMotor.setSpeed(tp - turn);               	
+		}
+		
+		this.leftMotor.stop(true);
+		this.rightMotor.stop(true);
+		
 	}
 	
+	private void WaiteForOk()
+	{
+		this.wait = false;
+		this.leftMotor.stop(true);
+		this.rightMotor.stop(true);	
+		
+		while(!this.wait)
+		{			
+		}
+	}
 	
-	private void EntranceModus(boolean modus)
+	private void EntranceModus(Checkpoint entrance, Checkpoint exit)
 	{
 		try{
+			this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
+					new Message(RoboterData.code_NextCheckpoint, entrance.getName()));
+			
+			this.links90();						
+			
+			this.fahreZu(entrance.getColor());
+			
+			this.CheckForContinue(new Message(RoboterData.code_Checkpoint, entrance.getName()),
+					new Message(RoboterData.code_PostionLoad, entrance.getName()));
+			
+			this.position = entrance;
+			
 			this.leftMotor.stop(true);
-			this.rightMotor.stop(true);	
-			this.rightMotor.rotate(400);
-			this.fahreZu(Color.RED);
-			this.bt.SendPosition("Lager erreicht");
-			this.leftMotor.stop(true);
-			this.rightMotor.stop(true);	
-			this.bt.SendPosition("Aufladen/Abladen");
-			LCD.drawString("STOP LAGER", 0, 7);
+			this.rightMotor.stop(true);
+
 			Sound.playTone(500,500,100); 
 			Thread.sleep(5000);
 			Sound.playTone(500,500,100); 
-			this.bt.SendPosition("Aufladen/Abladen beendet");
-			LCD.drawString("WEITER LAGER", 0, 7);
-     		leftMotor.rotate(400);
-			this.fahreZu(Color.RED);
-			Sound.playTone(500,500,100); 
-			this.bt.SendPosition("Lagerausgang erreicht");
-			LCD.drawString("LAGER AUSGANG", 0, 7);
-			rightMotor.rotate(270);	
 			
+			List<Message> message = new ArrayList<Message>();
+			message.add(new Message(RoboterData.code_FinishLoad, this.position.getName()));
+			message.add(new Message(RoboterData.code_NextCheckpoint, exit.getName()));
+						
+			this.rechts90();
+			this.bt.SendPosition(Protokoll.MessageToString(message));
+  			this.WaiteForOk();	
+  			
+  			this.fahreZu(exit.getColor());
+  			 			
+  			
+  			 			 			 			
 		}catch(Exception e)
 		{
 			
 		}
 	}
 	
+	void links90(){	
+		
+		this.leftMotor.stop(true);
+		this.rightMotor.stop(true);
+		
+		rightMotor.setSpeed(200);
+		leftMotor.setSpeed(200);
+		rightMotor.rotate(450);												    		
+	}
+
+	void rechts90(){
+		
+		this.leftMotor.stop(true);
+		this.rightMotor.stop(true);
+		
+		rightMotor.setSpeed(200);
+		leftMotor.setSpeed(200);
+		leftMotor.rotate(400);												    		
+	}
+	
+	void links45(){	
+		
+		this.leftMotor.stop(true);
+		this.rightMotor.stop(true);
+		
+		rightMotor.setSpeed(200);
+		leftMotor.setSpeed(200);	
+		rightMotor.rotate(220);												    		
+	}
+	
+	void turn180(){
+		
+		this.leftMotor.stop(true);
+		this.rightMotor.stop(true);
+		
+		rightMotor.setSpeed(200);
+		leftMotor.setSpeed(200);
+		leftMotor.backward();
+		rightMotor.forward();
+		
+		Delay.msDelay(2000);
+				
+		
+	}
+	
+	public void InputMessage(String message)
+	{
+		LCD.drawString("N: "+ message, 0, 0);
+		List<Message> list =  Protokoll.StringToMessage(message);
+		
+		if(list.size() == 1)
+		{
+			
+			if(list.get(0).getKey().equals(RoboterData.code_Conintue))
+			{
+				this.wait=true;
+				
+			}else if(list.get(0).getKey().equals(RoboterData.code_ParkPosition))
+			{
+				this.SetParkPosition(list.get(0));
+			}
+		}else if(list.size() == 3)
+		{
+			this.manager.addOrder(list);
+		}else
+		{
+			//Fehlerbehbung
+		}
+	}
 	
 	public static void main (String[] args) {
 		Roboter r = new Roboter();

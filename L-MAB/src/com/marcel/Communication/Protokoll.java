@@ -26,7 +26,13 @@ public class Protokoll {
 		return m;
 	}
 
+	public static String MessageToString(Message message)
+	{
 
+		return (message.getKey()+":"+message.getValue()+"#");
+	}
+	
+	
 	
 	public static List<Message> StringToMessage(String message)
 	{

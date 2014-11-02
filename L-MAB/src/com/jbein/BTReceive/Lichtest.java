@@ -1,0 +1,38 @@
+package com.jbein.BTReceive;
+
+import lejos.nxt.Button;
+import lejos.nxt.ButtonListener;
+import lejos.nxt.ColorSensor;
+import lejos.nxt.LCD;
+import lejos.nxt.SensorPort;
+
+public class Lichtest {
+	
+	public static void Test()
+	{
+		ColorSensor colorSensor = new ColorSensor(SensorPort.S1);
+		
+		Button.ESCAPE.addButtonListener(new ButtonListener() {
+		      public void buttonPressed(Button b) {		        
+		    	  System.exit(0);
+		      }
+
+		      public void buttonReleased(Button b) {		    	  		       
+		      }
+		    });	
+		
+		
+		while(true)
+		{
+			LCD.drawString("Licht: "+ colorSensor.getLightValue()+"     ", 0, 1);
+		}
+			
+		
+	}
+	
+	
+	public static void main (String[] args) {
+		Test();
+	}
+
+}
