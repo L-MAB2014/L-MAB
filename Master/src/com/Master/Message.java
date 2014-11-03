@@ -1,12 +1,12 @@
 package com.Master;
 
 /**
- * Das Message/Objekt besteht aus einem SChluessel und einem Wert
+ * Das Message/Objekt besteht aus einem Schlüssel und einem Wert
  */
 public class Message {
 
     /**
-     * Schluessel der Message
+     * Schlüssel der Message
      */
     private String key;
 
@@ -21,16 +21,16 @@ public class Message {
     }
 
     /**
-     * Gibt den Schluessel der Message zurueck
+     * Gibt den Schlüssel der Message zurück
      *
-     * @return Schluessel der Message
+     * @return Schlüssel der Message
      */
     public String getKey() {
         return key;
     }
 
     /**
-     * Setyt den Wert der Message
+     * Setzt den Wert der Message
      *
      * @param key zu setzender Wert
      */
@@ -39,7 +39,7 @@ public class Message {
     }
 
     /**
-     * Gibt den Wert der Message zurueck
+     * Gibt den Wert der Message zurück
      *
      * @return Wert der Message
      */

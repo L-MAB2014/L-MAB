@@ -3,13 +3,11 @@ package com.Master;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  *
  *
  */
 public class Checkpoint {
-
 
     /**
      * Name des Checkpunktes
@@ -17,12 +15,12 @@ public class Checkpoint {
     private String name;
 
     /**
-     * N�chster Checkpunkt auf dem normalen Weg
+     * Nüchster Checkpunkt auf dem normalen Weg
      */
     private Checkpoint next_WayCheckpoint;
 
     /**
-     * N�chstes m�gliches Lager, Parkplatz oder Puffer
+     * Nüchstes mügliches Lager, Parkplatz oder Puffer
      */
     private Checkpoint next_OtherCheckpoint;
 
@@ -32,7 +30,7 @@ public class Checkpoint {
     private Checkpoint previous_WayCheckpoint;
 
     /**
-     * M�gliches vorheriges Lager, Parkplatz oder Puffer
+     * Mügliches vorheriges Lager, Parkplatz oder Puffer
      */
     private Checkpoint previous_OtherCheckpoint;
 
@@ -47,7 +45,7 @@ public class Checkpoint {
     private boolean isClosed;
 
     /**
-     * Warteliste f�r den Checkpoint
+     * Warteliste für den Checkpoint
      */
     private List<Bot> waiting_List;
 
@@ -65,12 +63,11 @@ public class Checkpoint {
         this.previous_OtherCheckpoint = null;
     }
 
-
     /**
-     * Setzt die n�chsten Checkpunkte des Checkpunktes
+     * Setzt die nächsten Checkpunkte des Checkpunktes
      *
-     * @param next_WayCheckpoint   N�chster Checkpunkt der sich auf dem Weg befindet
-     * @param next_OtherCheckpoint N�chster Checkpunkt der als Lager,Puffer oder Parkplatz dient
+     * @param next_WayCheckpoint   Nächster Checkpunkt der sich auf dem Weg befindet
+     * @param next_OtherCheckpoint Nächster Checkpunkt der als Lager, Puffer oder Parkplatz dient
      */
     public void setNextCheckpoints(Checkpoint next_WayCheckpoint, Checkpoint next_OtherCheckpoint) {
         this.next_WayCheckpoint = next_WayCheckpoint;
@@ -81,7 +78,7 @@ public class Checkpoint {
      * Setzt die vorherigen Checkpunkte des Checkpunktes
      *
      * @param previous_WayCheckpoint   Vorheriger Checkpunkt der sich auf dem Weg befindet
-     * @param previous_OtherCheckpoint Vorheriger Checkpunkt der als Lager,Puffer oder Parkplatz diente
+     * @param previous_OtherCheckpoint Vorheriger Checkpunkt der als Lager, Puffer oder Parkplatz diente
      */
     public void setPeviousCheckpoints(Checkpoint previous_WayCheckpoint, Checkpoint previous_OtherCheckpoint) {
         this.previous_WayCheckpoint = previous_WayCheckpoint;
@@ -135,29 +132,26 @@ public class Checkpoint {
         return name;
     }
 
-
     /**
-     * Gibt den naechsten Checkpunkt auf dem Weg zurueck
+     * Gibt den nächsten Checkpunkt auf dem Weg zurück
      *
-     * @return naechster Checkpunkt(Weg)
+     * @return nächster Checkpunkt(Weg)
      */
     public Checkpoint getNext_WayCheckpoint() {
         return next_WayCheckpoint;
     }
 
-
     /**
-     * Gibt den naechsten Checkpunkt Parkplatz & Puffer usw. zurueck
+     * Gibt den nächsten Checkpunkt Parkplatz & Puffer usw. zurück
      *
-     * @return naechster Checkpunkt(Anderer)
+     * @return nächster Checkpunkt(Anderer)
      */
     public Checkpoint getNext_OtherCheckpoint() {
         return next_OtherCheckpoint;
     }
 
-
     /**
-     * Gibt den vorheriger Checkpunkt auf dem Weg zurueck
+     * Gibt den vorheriger Checkpunkt auf dem Weg zurück
      *
      * @return vorheriger Checkpunkt(Weg)
      */
@@ -165,9 +159,8 @@ public class Checkpoint {
         return previous_WayCheckpoint;
     }
 
-
     /**
-     * Gibt den vorheriger Checkpunkt Parkplatz & Puffer usw. zurueck
+     * Gibt den vorheriger Checkpunkt Parkplatz & Puffer usw. zurück
      *
      * @return vorheriger Checkpunkt(Anderer)
      */
@@ -176,14 +169,13 @@ public class Checkpoint {
     }
 
     /**
-     * Gibt den ersten Bot aus der Warteliste zur�ck
+     * Gibt den ersten Bot aus der Warteliste zurück
      *
      * @return Erster Bot der Warteliste
      */
     public Bot getFirstOnWaitList() {
         return this.waiting_List.remove(0);
     }
-
 
     /**
      * Setzt einen Bot in die Warteliste
@@ -200,14 +192,12 @@ public class Checkpoint {
         return false;
     }
 
-
     /**
-     * �berpr�ft ob sich ein Bot in der Warteliste befindet
+     * Überprüft ob sich ein Bot in der Warteliste befindet
      *
      * @return
      */
     public boolean isBotInWaitList() {
         return this.waiting_List.size() == 0 ? false : true;
     }
-
 }

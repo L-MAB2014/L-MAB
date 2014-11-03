@@ -2,6 +2,6 @@ package com.View;
 
 import javax.swing.*;
 
-public class ViewSimulator extends JFrame {
+public class ViewSimulator extends JFrame { //TODO ???
 
 }

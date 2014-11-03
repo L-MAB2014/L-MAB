@@ -28,9 +28,9 @@ public class Order {
     }
 
     /**
-     * Gibt die ID der Order zur�ck
+     * Gibt die ID der Order zurück
      *
-     * @return ID der ORder
+     * @return ID der Order
      */
     public int getId() {
         return id;
@@ -46,7 +46,7 @@ public class Order {
     }
 
     /**
-     * Gibt das Lager der Order zur�ck
+     * Gibt das Lager der Order zurück
      *
      * @return Lager
      */
@@ -64,7 +64,7 @@ public class Order {
     }
 
     /**
-     * Gibt das Ziel der  Order zur�ck
+     * Gibt das Ziel der Order zurück
      *
      * @return Ziel
      */

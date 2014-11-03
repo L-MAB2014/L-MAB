@@ -11,7 +11,7 @@ import java.util.List;
 public class Controller implements IController {
 
     /**
-     * Benutzeroberfl�che
+     * Benutzeroberfläche
      */
     private View view;
 
@@ -26,16 +26,15 @@ public class Controller implements IController {
     private Controller controller;
 
     /**
-     * Enth�lt alle Checkpoints des Lagers
+     * Enthüllt alle Checkpoints des Lagers
      */
     private HashMap<String, Checkpoint> checkpoints;
 
-    //Kann sp�ter Weg
+    //TODO Kann später Weg
     private int order_ID;
 
-    //Kann sp�ter Weg
+    //TODO Kann später Weg
     private int counter;
-
 
     Controller() {
         this.controller = this;
@@ -54,11 +53,8 @@ public class Controller implements IController {
         this.view.addSimulationSpeichernListener(new SimulationSpeichernListener());
         this.view.addSimulationEinstellungenListener(new SimulationEinstellungenListener());
 
-
         this.checkpoints = CreatCheckpoints.InitializeCheckpoints();
         this.bots = new ArrayList<Bot>();
-
-
     }
 
     public static void main(String[] args) {
@@ -87,10 +83,10 @@ public class Controller implements IController {
     }
 
     /**
-     * Ueberprueft ob ein Bots schon mit dem �bergebenen-Namen existiert
+     * ÜberprÜft ob ein Bots schon mit dem übergebenen-Namen existiert
      *
      * @param name Name des Bots
-     * @return Ergebnis der �berpruefung
+     * @return Ergebnis der überprüfung
      */
     public boolean ExitsBot(String name) {
         for (int i = 0; i < this.bots.size(); ++i) {
@@ -101,9 +97,9 @@ public class Controller implements IController {
     }
 
     /* (non-Javadoc)
-     * @see com.Master.IController#CheckForConintue(java.lang.String)
+     * @see com.Master.IController#CheckForContinue(java.lang.String)
      */
-    public boolean CheckForConintue(String checkpoint, String next_checkpoint, Bot bot) {
+    public boolean CheckForContinue(String checkpoint, String next_checkpoint, Bot bot) {
         Checkpoint check = checkpoints.get(checkpoint);
 
         if (check != null) {
@@ -111,27 +107,26 @@ public class Controller implements IController {
             Checkpoint checknext2 = check.getNext_OtherCheckpoint();
 
             if (checknext != null && checknext.getName().equals(next_checkpoint)) {
-                return this.EditCheckpointsForConintue(check, checknext, bot);
+                return this.EditCheckpointsForContinue(check, checknext, bot);
             } else if (checknext2 != null && checknext2.getName().equals(next_checkpoint)) {
-                return this.EditCheckpointsForConintue(check, checknext2, bot);
+                return this.EditCheckpointsForContinue(check, checknext2, bot);
             } else {
-                InputConsole(bot.getBt_Name() + ": n�chster Checkpunkt" + next_checkpoint + "  nicht vorhanden");
+                InputConsole(bot.getBt_Name() + ": nächster Checkpunkt" + next_checkpoint + " nicht vorhanden");
             }
 
         } else {
-            InputConsole(bot.getBt_Name() + ": aktueller Checkpunkt" + checkpoint + "  nicht vorhanden");
+            InputConsole(bot.getBt_Name() + ": aktueller Checkpunkt" + checkpoint + " nicht vorhanden");
         }
         return false;
     }
 
     public void ToPufferAndSetOnWaitList(String check, String entrance) {
-        // noch proggen
+        //TODO noch proggen
     }
 
-    private boolean EditCheckpointsForConintue(Checkpoint checkpoint, Checkpoint next_checkpoint, Bot bot) {
+    private boolean EditCheckpointsForContinue(Checkpoint checkpoint, Checkpoint next_checkpoint, Bot bot) {
         if (!next_checkpoint.isClosed()) {
             next_checkpoint.setClosed(true);
-
             if (checkpoint.isBotInWaitList()) {
                 if (checkpoint.isReserved()) {
                     checkpoint.setClosed(false);
@@ -141,7 +136,6 @@ public class Controller implements IController {
                     WorkOffWaitList w = new WorkOffWaitList(checkpoint);
                     w.start();
                 }
-
             } else {
                 checkpoint.setClosed(false);
                 checkpoint.setReserved(false);
@@ -155,7 +149,7 @@ public class Controller implements IController {
                     return true;
                 }
             } else {
-                InputConsole(bot.getBt_Name() + ": in der Warteliste f�r  Checkpunkt" + next_checkpoint);
+                InputConsole(bot.getBt_Name() + ": in der Warteliste für  Checkpunkt" + next_checkpoint);
             }
         }
 
@@ -164,13 +158,8 @@ public class Controller implements IController {
 
     public boolean TestEntranceForPuffer(String entrance) {
         Checkpoint check = checkpoints.get(entrance);
-
-        if (check.isClosed())
+        if (check.isClosed() || check.isReserved())
             return false;
-
-        if (check.isReserved())
-            return false;
-
         return true;
     }
 
@@ -182,7 +171,6 @@ public class Controller implements IController {
             return false;
         }
         return false;
-
     }
 
     public boolean IsNextPufferFree(String check) {
@@ -190,33 +178,29 @@ public class Controller implements IController {
             Checkpoint puffer1 = checkpoints.get("PF2");
             if (!puffer1.isClosed() && !puffer1.isReserved())
                 return true;
-
             Checkpoint puffer2 = checkpoints.get("PF3");
             if (!puffer2.isClosed() && !puffer2.isReserved())
                 return true;
         }
-
         if (check.equals("C2")) {
             Checkpoint puffer = checkpoints.get("PF3");
             if (!puffer.isClosed() && !puffer.isReserved())
                 return true;
         }
-
         return false;
     }
 
     /**
-     * ActionListener zum Betaetigen des Bots Verwalten -Buttons
+     * ActionListener zum Betätigen des Bots Verwalten-Buttons
      */
     class ControlBotListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-
-            InputConsole("Der Bots-Verwalten-Button wurde bet�tigt");
+            InputConsole("Der Bots-Verwalten-Button wurde betätigt");
         }
     }
 
     /**
-     * ActionListener zum Betaetigen des Neuen Bots -Buttons
+     * ActionListener zum Betätigen des Neuen Bots -Buttons
      */
     class NewBotListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
@@ -243,20 +227,17 @@ public class Controller implements IController {
                 }
             } else {
                 InputConsole("Fehlermeldung : Keine Eingabe");
-                //Fehlermeldung : Keine Eingabe
+                //Fehlermeldung: Keine Eingabe
             }
-
-
         }
     }
 
     /**
-     * ActionListener zum Betaetigen des  Auftrags Verwaltungs-Buttons
+     * ActionListener zum Betätigen des Auftrags Verwaltungs-Buttons
      */
     class ControlOrderListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-
-
+            //TODO Betätigen des Auftrags Verwaltungs-Buttons
         }
     }
 
@@ -275,78 +256,70 @@ public class Controller implements IController {
                 Order new_order = new Order(id, store, exit);
 
                 if (bots.size() > 0) {
-                    if (counter >= bots.size())
+                    if (counter >= bots.size()) {
                         counter = 0;
-
+                    }
                     bots.get(counter).NewOrder(new_order);
                     counter++;
                 } else {
                     view.InputDialog("Keine Bots vorhanden");
                 }
-
-            } else
-                view.InputDialog("Lager und Ausgang w�hlen!");
-
+            } else {
+                view.InputDialog("Lager und Ausgang wühlen!");
+            }
         }
     }
 
     /**
-     * ActionListener zum Betaetigen des Stopp/Buttons
+     * ActionListener zum Betätigen des Stopp/Buttons
      */
     class StoppListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-
-            InputConsole("Der Stopp-Button wurde bet�tigt");
+            InputConsole("Der Stopp-Button wurde betätigt");
         }
     }
 
     /**
-     * ActionListener zum Betaetigen des Men�teintrags "Starten"
+     * ActionListener zum Betätigen des Menüteintrags "Starten"
      */
     class SimulationStartListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-
             InputConsole("Start");
         }
     }
 
     /**
-     * ActionListener zum Betaetigen des Men�teintrags "�ffnen"
+     * ActionListener zum Betätigen des Menüteintrags "Öffnen"
      */
     class SimulationOeffnenListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-
-            InputConsole("�ffnen");
+            InputConsole("Öffnen");
         }
     }
 
     /**
-     * ActionListener zum Betaetigen des Men�teintrags "Speichern"
+     * ActionListener zum Betätigen des Menüteintrags "Speichern"
      */
     class SimulationSpeichernListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-
             InputConsole("Speichern");
         }
     }
 
     /**
-     * ActionListener zum Betaetigen des Men�teintrags "Einstellungen"
+     * ActionListener zum Betätigen des Menüteintrags "Einstellungen"
      */
     class SimulationEinstellungenListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-
             InputConsole("Einstellungen");
         }
     }
 
     /**
-     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung h�ndelt
+     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung händelt
      */
     private class WorkOffWaitList extends Thread {
-
         Checkpoint check;
-
         WorkOffWaitList(Checkpoint cp) {
             this.check = cp;
         }
@@ -359,13 +332,9 @@ public class Controller implements IController {
             while (check.isBotInWaitList() && b) {
                 Bot waitBot = check.getFirstOnWaitList();
                 b = waitBot.ContinueAfterWaitList();
-
                 check = checkpoints.get(waitBot.getCheckpoint());
             }
-
             check.setClosed(false);
         }
-
     }
-
 }

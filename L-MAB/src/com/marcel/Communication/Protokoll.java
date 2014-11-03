@@ -1,7 +1,9 @@
 package com.marcel.Communication;
 
-public class Protokoll {
+import java.util.ArrayList;
+import java.util.List;
 
+public class Protokoll {
 
     public static String MessageToString(List<Message> message) {
         String m = "";
@@ -13,19 +15,14 @@ public class Protokoll {
                 m += ";";
         }
         m += "#";
-
         return m;
     }
 
     public static String MessageToString(Message message) {
-
         return (message.getKey() + ":" + message.getValue() + "#");
     }
 
-
     public static List<Message> StringToMessage(String message) {
-
-
         List<Message> l = new ArrayList<Message>();
 //		String[] splitMessage = message.split(";");
 //		
@@ -56,9 +53,7 @@ public class Protokoll {
             if (value != "" && key != "")
                 l.add(new Message(key, value));
         }
-
         return l;
-
     }
 
 

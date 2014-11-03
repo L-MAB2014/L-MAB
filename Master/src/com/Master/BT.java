@@ -26,7 +26,7 @@ public class BT {
      */
     private String bt_Name;
     /**
-     * Controller f�r Informationen
+     * Controller für Informationen
      */
     private IController controller;
 
@@ -85,7 +85,7 @@ public class BT {
     }
 
     /**
-     * �berpr�ft und leitet den Verbindungsaufbau
+     * überprüft und leitet den Verbindungsaufbau
      *
      * @return
      */
@@ -123,7 +123,7 @@ public class BT {
     }
 
     /**
-     * Schlie�t die Verbindung zum Bot
+     * Schlieüt die Verbindung zum Bot
      */
     public void CloseAgent() {
         try {
@@ -197,7 +197,7 @@ public class BT {
 
 
     /**
-     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung h�ndelt
+     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung hündelt
      */
     private class InputChannel extends Thread {
 

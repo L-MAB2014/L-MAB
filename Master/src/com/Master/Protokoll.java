@@ -3,22 +3,20 @@ package com.Master;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * Die Klasse "Protokoll" erstellt oder entziffert  Nachrichten
+ * Die Klasse "Protokoll" erstellt oder entziffert Nachrichten
  * zum Nachrichtenaustausch mit dem Bot(Roboter)
  * <p/>
  * Das Protokoll sieht wie folgt aus:
  * <p/>
- * Sch�ssel : Wert ; SChl�ssel : Wert ; ..... #
+ * Schlüssel : Wert; Schlüssel : Wert; ..... #
  * <p/>
- * Eine Nachricht wird aufgeteilt in einen Schl�ssel und einen Wert, welche
- * durch einen Doppelpunkt getrennt werden, soll eine weitere ANchricht angef�gt
- * werden geschiet dies �ber einen Semikolon. Am Ende einer kompletten Nachricht
+ * Eine Nachricht wird aufgeteilt in einen Schlüssel und einen Wert, welche
+ * durch einen Doppelpunkt getrennt werden, soll eine weitere Nachricht angefügt
+ * werden geschiet dies über einen Semikolon. Am Ende einer kompletten Nachricht
  * wird eine Raute (#) positionert, die das Ende wiederspiegelt.
  */
 public class Protokoll {
-
 
     /**
      * Erstellt anhand eines Order-Objektes eine nachdem Protokoll vorgeschriebene Nachricht
@@ -29,7 +27,6 @@ public class Protokoll {
     public static String OrderToString(Order order) {
         return String.format("ID:%s;S:%s;E:%s#", order.getId(), order.getStore_place(), order.getExit_place());
     }
-
 
     /**
      * Erstellt anhand einer Liste von Message-Objekten eine nachdem Protokoll vorgeschriebene Nachricht
@@ -60,7 +57,7 @@ public class Protokoll {
      * Wandelt einen eingegangene Message in einzelne Message-Objekte um und speichert diese in eine Liste
      *
      * @param message Eingehende Nachricht (nachdem Protokolformat  )
-     * @return Aufgeschl�sselte Nachricht in Message Objekten
+     * @return Aufgeschlüsselte Nachricht in Message Objekten
      */
     public static List<Message> StringToMessage(String message) {
         List<Message> l = new ArrayList<Message>();
@@ -70,7 +67,6 @@ public class Protokoll {
             String[] sm = splitMessage[i].split(":");
             l.add(new Message(sm[0], sm[1]));
         }
-
         return l;
     }
 }

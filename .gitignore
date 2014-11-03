@@ -190,3 +190,12 @@ com_crashlytics_export_strings.xml
 *.vrb
 *.xdy
 *.tdo
+
+# NXJ
+Master/bin
+Master/.settings
+*.nxj
+*.nxd
+L-MAB/bin
+StockSimulator/bin
+StockSimulator/.settings

@@ -3,16 +3,15 @@ package com.Master;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Bot implements IBot {
 
     /**
-     * Controller f�r informationen
+     * Controller für Informationen
      */
     private IController controller;
 
     /**
-     * Bluetooth-Objekt f�r die Verbindung
+     * Bluetooth-Objekt für die Verbindung
      */
     private BT bt;
 
@@ -61,7 +60,7 @@ public class Bot implements IBot {
     private String last_checkpoint;
 
     /**
-     * N�chste Position
+     * Nächste Position
      */
     private String next_checkpoint;
 
@@ -82,7 +81,6 @@ public class Bot implements IBot {
      * Park/Start- Position des Bots
      */
     private String park_position;
-
 
     Bot(IController controller, String bt_Name, int id, String park) {
         this.id = id;
@@ -173,36 +171,36 @@ public class Bot implements IBot {
         this.checkpoint = check;
         this.controller.UpdateMap(this.checkpoint, this.last_checkpoint, this.bt_Name);
         controller.InputConsole((this.bt_Name + " bereit zum Laden"));
-        bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Conintue, MasterData.code_Load))));
+        bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Conintinue, MasterData.code_Load))));
     }
 
 
     /**
-     * �berpr�ft ob der Bot weiterfahren kann und sendet dies dann dem Roboter zu
+     * Überprüft ob der Bot weiterfahren kann und sendet dies dann dem Roboter zu
      */
     private void CheckAndSendForContinue() {
-        if (this.controller.CheckForConintue(checkpoint, next_checkpoint, this)) {
+        if (this.controller.CheckForContinue(checkpoint, next_checkpoint, this)) {
             controller.InputConsole((this.bt_Name + ": Checkpoint:" + this.next_checkpoint + " Freigeben"));
             if (this.puffer_info) {
                 List<Message> message = new ArrayList<Message>();
-                message.add((new Message(MasterData.code_Conintue, this.next_checkpoint)));
-                message.add((new Message(MasterData.code_Reserved, MasterData.code_Conintue)));
+                message.add((new Message(MasterData.code_Conintinue, this.next_checkpoint)));
+                message.add((new Message(MasterData.code_Reserved, MasterData.code_Conintinue)));
 
                 bt.SendMessage(Protokoll.MessageToString(message));
                 this.puffer_info = false;
             } else
-                bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Conintue, this.next_checkpoint))));
+                bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Conintinue, this.next_checkpoint))));
             controller.InputConsole((this.bt_Name + "Freigabe gesendet"));
         } else {
             controller.InputConsole((this.bt_Name + ": Checkpoint:" + this.next_checkpoint + " nicht Freigeben"));
             this.inWaitList = true;
-            this.m_waitList = new Message(MasterData.code_Conintue, this.next_checkpoint);
+            this.m_waitList = new Message(MasterData.code_Conintinue, this.next_checkpoint);
         }
     }
 
 
     /**
-     * F�hrt die Aktionen weiter bevor der Bot in die Warteschlange kam
+     * Führt die Aktionen weiter bevor der Bot in die Warteschlange kam
      *
      * @return
      */
@@ -217,7 +215,7 @@ public class Bot implements IBot {
 
             return true;
         } else if (this.inPuffer) {
-            bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Reserved, MasterData.code_Conintue))));
+            bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Reserved, MasterData.code_Conintinue))));
             this.inPuffer = false;
             return true;
         }
@@ -256,7 +254,7 @@ public class Bot implements IBot {
                 Message m3 = m.get(2);
 
                 if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_NextCheckpoint) && m3.getKey().equals(MasterData.code_TestTarget)) {
-                    if (controller.TestEntranceForPuffer(m3.getValue()))  // Pr�fen ob Lager belegt ist
+                    if (controller.TestEntranceForPuffer(m3.getValue()))  // Prüfen ob Lager belegt ist
                     {
                         if (controller.EntranceReserved(m3.getValue()))    // Lager Reservieren!
                         {
@@ -268,7 +266,7 @@ public class Bot implements IBot {
                         }
                     }
 
-                    if (controller.IsNextPufferFree(m1.getValue())) // Pr�fen ob ein n�chtser Puffer frei ist
+                    if (controller.IsNextPufferFree(m1.getValue())) // Prüfen ob ein nüchtser Puffer frei ist
                     {
                         this.UpdateCheckpoint(m1.getValue(), m2.getValue());
                         this.CheckAndSendForContinue();
@@ -299,7 +297,7 @@ public class Bot implements IBot {
 
 
     /**
-     * Updatet die Informationen des Bots in der Benutzeroberfl�che (Tabelle)
+     * Updatet die Informationen des Bots in der Benutzeroberflüche (Tabelle)
      */
     public void InfoUpdate() {
         this.controller.UpdateTable(this.id, new String[]{this.bt_Name, this.status, this.target, this.checkpoint, "" + this.order_management.size()});

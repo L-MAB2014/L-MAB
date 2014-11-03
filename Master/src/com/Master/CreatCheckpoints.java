@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class CreatCheckpoints {
 
     /**
-     * ERstellt alle Checkpoints und die dazu gehoerigen Verbindungen
+     * Erstellt alle Checkpoints und die dazu gehörigen Verbindungen
      *
      * @return Map mit den Checkpoints des Lagers(Map)
      */

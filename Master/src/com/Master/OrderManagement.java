@@ -2,9 +2,7 @@ package com.Master;
 
 import java.util.ArrayList;
 
-
 public class OrderManagement extends ArrayList<Order> {
-
 
     /**
      * Legt ein neues Order/Objekt an und speichert es
@@ -17,10 +15,8 @@ public class OrderManagement extends ArrayList<Order> {
         this.add(new Order(id, store, exit));
     }
 
-
-//	public Order GiveFirstOrder()
+//	public Order GiveFirstOrder() //TODO ???
 //	{
 //		return this.remove(0);
 //	}
-
 }
