@@ -146,13 +146,10 @@ public class Bot implements IBot {
             this.controller.InputConsole("Nachricht " + message + " wurde erfolgreich gesendet");
         else
             this.controller.InputConsole("Fehler beim senden der Nachricht " + message);
-
     }
 
     /**
      * Updatet die Position des Bots
-     *
-     * @param m Message mit der neuen Position
      */
     private void UpdateCheckpoint(String check, String next_check) {
         this.last_checkpoint = this.checkpoint;
@@ -163,8 +160,6 @@ public class Bot implements IBot {
 
     /**
      * Updatet die Position des Bots
-     *
-     * @param m Message mit der neuen Position
      */
     private void Entrance(String check) {
         this.last_checkpoint = this.checkpoint;
@@ -254,10 +249,8 @@ public class Bot implements IBot {
                 Message m3 = m.get(2);
 
                 if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_NextCheckpoint) && m3.getKey().equals(MasterData.code_TestTarget)) {
-                    if (controller.TestEntranceForPuffer(m3.getValue()))  // Prüfen ob Lager belegt ist
-                    {
-                        if (controller.EntranceReserved(m3.getValue()))    // Lager Reservieren!
-                        {
+                    if (controller.TestEntranceForPuffer(m3.getValue())) { // Prüfen ob Lager belegt ist
+                        if (controller.EntranceReserved(m3.getValue())) { // Lager Reservieren!
                             this.UpdateCheckpoint(m1.getValue(), m2.getValue());
                             this.puffer_info = true;
                             this.CheckAndSendForContinue();
@@ -266,8 +259,7 @@ public class Bot implements IBot {
                         }
                     }
 
-                    if (controller.IsNextPufferFree(m1.getValue())) // Prüfen ob ein nüchtser Puffer frei ist
-                    {
+                    if (controller.IsNextPufferFree(m1.getValue())) { // Prüfen ob ein nächster Puffer frei ist
                         this.UpdateCheckpoint(m1.getValue(), m2.getValue());
                         this.CheckAndSendForContinue();
                         this.InfoUpdate();
@@ -286,7 +278,6 @@ public class Bot implements IBot {
         }
     }
 
-
     /**
      *
      */
@@ -294,7 +285,6 @@ public class Bot implements IBot {
         bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_ParkPosition, this.park_position))));
         controller.InputConsole((this.bt_Name + ": Park Position " + this.park_position + " gesendet"));
     }
-
 
     /**
      * Updatet die Informationen des Bots in der Benutzeroberflüche (Tabelle)
@@ -306,7 +296,7 @@ public class Bot implements IBot {
     /**
      * Gibt den Verbindungsstatus des Bots an
      *
-     * @returnVerbindungsstatus
+     * @return Verbindungsstatus
      */
     public boolean isConnect() {
         return this.bt.isConnect();
