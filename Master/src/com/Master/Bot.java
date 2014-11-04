@@ -2,10 +2,16 @@ package com.Master;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Bot implements IBot {
 
-    /**
+	/**
+	 * logger
+	 */
+	private static Logger logger = Logger.getAnonymousLogger();
+	
+	/**
      * Controller für Informationen
      */
     private IController controller;
@@ -85,14 +91,14 @@ public class Bot implements IBot {
     Bot(IController controller, String bt_Name, int id, String park) {
         this.id = id;
         this.park_position = park;
-
+       
         this.controller = controller;
         this.bt_Name = bt_Name;
         this.bt = new BT(this.bt_Name, this.controller, this);
         this.order_management = new OrderManagement();
         this.status = "Nicht Verbunden";
         this.target = "-";
-        this.checkpoint = "-";
+        this.checkpoint = this.park_position;
         this.last_checkpoint = "-";
 
         this.connect = false;
@@ -116,6 +122,7 @@ public class Bot implements IBot {
                 this.controller.InputConsole("Verbindung hergestellt!");
                 this.status = "Verbunden";
                 this.InfoUpdate();
+                this.controller.UpdateMap(this.checkpoint, null, this.bt_Name);
                 return true;
             } else {
                 this.controller.InputConsole("KEINE Verbindung");
@@ -242,6 +249,8 @@ public class Bot implements IBot {
                         this.next_checkpoint = m2.getValue();
                         this.CheckAndSendForContinue();
                     }
+                }else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_ParkPosition)) {
+                    this.Parking();
                 }
             } else if (m.size() == 3) {
                 Message m1 = m.get(0);
@@ -276,6 +285,14 @@ public class Bot implements IBot {
             }
             this.InfoUpdate();
         }
+    }
+    
+    
+    public void Parking()
+    {
+    	this.last_checkpoint = this.checkpoint;
+    	this.checkpoint = this.park_position; 
+    	controller.UpdateMap(checkpoint, last_checkpoint, this.bt_Name);
     }
 
     /**

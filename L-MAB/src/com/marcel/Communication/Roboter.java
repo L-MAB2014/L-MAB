@@ -197,7 +197,7 @@ public class Roboter implements IRoboter {
             }
 
             this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
-                    new Message(RoboterData.code_NextCheckpoint, nextCheckWay.getName()));
+                    new Message(RoboterData.code_NextCheckpoint, nextCheckWay.getName()));                       
 
             if (left_curve) {
                 left_curve = false;
@@ -238,8 +238,12 @@ public class Roboter implements IRoboter {
 
         this.position = this.park_Position;
 
-        this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
-                new Message(RoboterData.code_ParkPosition, position.getName()));
+        
+        List<Message> message = new ArrayList<Message>();
+        message.add(new Message(RoboterData.code_Checkpoint, position.getName()));
+        message.add(new Message(RoboterData.code_ParkPosition, position.getName()));
+
+        this.bt.SendPosition(Protokoll.MessageToString(message));
 
         this.IsParking = true;
 
@@ -271,6 +275,8 @@ public class Roboter implements IRoboter {
 
             e.printStackTrace();
         }
+        
+        this.last_checkpoint = System.currentTimeMillis();
     }
 
     private void SetParkPosition(Message message) {
@@ -297,7 +303,6 @@ public class Roboter implements IRoboter {
 
                 if (f == farbe) {
                     Sound.playTone(500, 500, 100);
-                    this.last_checkpoint = System.currentTimeMillis();
                     return;
                 }
             }

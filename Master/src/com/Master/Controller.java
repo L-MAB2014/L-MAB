@@ -7,9 +7,15 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Controller implements IController {
 
+	/**
+	 * logger
+	 */
+	private static Logger logger = Logger.getAnonymousLogger();
+	
     /**
      * Benutzeroberfläche
      */
@@ -126,10 +132,14 @@ public class Controller implements IController {
 
     private boolean EditCheckpointsForContinue(Checkpoint checkpoint, Checkpoint next_checkpoint, Bot bot) {
         if (!next_checkpoint.isClosed()) {
-            next_checkpoint.setClosed(true);
+            
+        	next_checkpoint.setClosed(true);
+        	this.view.UpdateClosedpoint(next_checkpoint.getName(), true);
+        	
             if (checkpoint.isBotInWaitList()) {
                 if (checkpoint.isReserved()) {
                     checkpoint.setClosed(false);
+                    this.view.UpdateClosedpoint(checkpoint.getName(), false);
                     Bot waitBot = checkpoint.getFirstOnWaitList();
                     waitBot.ContinueAfterWaitList();
                 } else {
@@ -139,13 +149,18 @@ public class Controller implements IController {
             } else {
                 checkpoint.setClosed(false);
                 checkpoint.setReserved(false);
+                this.view.UpdateClosedpoint(checkpoint.getName(), false);
             }
             return true;
         } else {
             if (!next_checkpoint.setBotOnWaitList(bot)) {
                 if (!next_checkpoint.isBotInWaitList() && !next_checkpoint.isClosed()) {
-                    checkpoint.setClosed(false);
+                    checkpoint.setClosed(false);                    
                     next_checkpoint.setClosed(true);
+                    
+                    this.view.UpdateClosedpoint(checkpoint.getName(), false);
+                    this.view.UpdateClosedpoint(next_checkpoint.getName(), true);
+                    
                     return true;
                 }
             } else {
@@ -276,6 +291,7 @@ public class Controller implements IController {
     class StoppListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             InputConsole("Der Stopp-Button wurde betätigt");
+            
         }
     }
 
@@ -335,6 +351,7 @@ public class Controller implements IController {
                 check = checkpoints.get(waitBot.getCheckpoint());
             }
             check.setClosed(false);
+            view.UpdateClosedpoint(check.getName(), false);
         }
     }
 }

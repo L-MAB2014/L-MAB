@@ -5,10 +5,14 @@ import lejos.pc.comm.NXTConnector;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.logging.Logger;
 
 public class BT {
 
-
+	/**
+	 * logger
+	 */
+	private static Logger logger = Logger.getAnonymousLogger();
     /**
      * Dateneingangsstream
      */
