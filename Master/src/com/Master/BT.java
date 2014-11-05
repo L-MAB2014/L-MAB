@@ -64,17 +64,17 @@ public class BT {
      * @param address Adresse des zu verbindenen Bots
      * @return Verbindungs-Objekt
      */
-    private static NXTConnector CreateAndConnect(String address) {
+    private  NXTConnector CreateAndConnect(String address) {
         NXTConnector connection = new NXTConnector();
 
         connection.addLogListener(new NXTCommLogListener() {
 
             public void logEvent(String message) {
-                System.out.println("BTSend Log.listener: " + message);
+            	logger.info("Bot "+bt_Name+" BTSend Log.listener: " + message);
             }
 
             public void logEvent(Throwable throwable) {
-                System.out.println("BTSend Log.listener - stack trace: ");
+            	logger.info("Bot "+bt_Name+" BTSend Log.listener - stack trace: ");
                 throwable.printStackTrace();
             }
         });
@@ -82,7 +82,7 @@ public class BT {
         boolean connected = connection.connectTo(address);
 
         if (!connected) {
-            System.err.println("Failed to connect to any NXT");
+        	logger.info("Bot "+bt_Name+" Failed to connect to any NXT");
             return null;
         }
         return connection;
@@ -109,7 +109,7 @@ public class BT {
             }
 
         } catch (Exception e) {
-            controller.InputConsole(bt_Name + ": " + e);
+        	logger.info("Bot "+bt_Name+"-(MessageFromBot()):"+e);
             this.connect = false;
             return false;
         }
@@ -140,7 +140,7 @@ public class BT {
 
         } catch (Exception e) {
 
-            controller.InputConsole(bt_Name + ": " + e);
+        	logger.info("Bot "+bt_Name+"-(MessageFromBot()):"+e);
         } finally {
             this.ResetForNewConnect();
         }
@@ -155,6 +155,7 @@ public class BT {
      */
     public boolean SendMessage(String message) {
         try {
+        	logger.info("Bot "+bt_Name+"  bekommt folgende Nachrcht gesendet: "+message);
             dos.write(message.getBytes());
             dos.flush();
 
@@ -162,7 +163,7 @@ public class BT {
 
         } catch (Exception e) {
 
-            controller.InputConsole(bt_Name + ": " + e);
+        	logger.info("Bot "+bt_Name+"-(MessageFromBot()):"+e);
             return false;
         }
     }
@@ -184,8 +185,8 @@ public class BT {
             return message;
 
         } catch (Exception e) {
-
-            controller.InputConsole(bt_Name + ": " + e);
+        	
+        	logger.info("Bot "+bt_Name+"-(MessageFromBot()):"+e);
             return null;
         }
     }
@@ -211,7 +212,7 @@ public class BT {
         public void run() {
 
             try {
-                controller.InputConsole(bt_Name + ": Input-Cahnnel gestartet");
+            	logger.info("Der Input Channel für Bot "+bt_Name+" wurde gestartet");
                 while (connect) {
                     String message = MessageFromBot();
                     bot.HandleMessageInput(message);
@@ -219,8 +220,9 @@ public class BT {
 
             } catch (Exception e) {
 
-                controller.InputConsole(bt_Name + ": " + e);
+            	logger.info("Bot "+bt_Name+"-(MessageFromBot()):"+e);
             }
+            logger.info("Der Input Channel für Bot "+bt_Name+" wurde beendet");
             controller.InputConsole(bt_Name + ": Input-Cahnnel beendet");
 
         }

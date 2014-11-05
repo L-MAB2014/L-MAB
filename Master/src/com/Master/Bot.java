@@ -26,9 +26,12 @@ public class Bot implements IBot {
      */
     private boolean connect;
 
-    private boolean puffer_info;
 
+    private boolean puffer_modus;
+    
     private boolean inPuffer;
+    
+    private boolean puffer_reserved;
 
     /**
      * Gibt an ob sich der Bot in einer Warteschlange befindet
@@ -69,6 +72,9 @@ public class Bot implements IBot {
      * NÃ¤chste Position
      */
     private String next_checkpoint;
+    
+    
+    private String puffer;
 
 
     /**
@@ -76,7 +82,8 @@ public class Bot implements IBot {
      * aus der Warteschlange dran kommt und
      * zum Bot sendet
      */
-    private Message m_waitList;
+    private List<Message> m_waitList;
+    
 
     /**
      * ID des Bots
@@ -94,16 +101,20 @@ public class Bot implements IBot {
        
         this.controller = controller;
         this.bt_Name = bt_Name;
+        logger.info("Fuer Bot "+bt_Name+" wird ein BT-Objekt angelegt");
         this.bt = new BT(this.bt_Name, this.controller, this);
+        logger.info("Fuer Bot "+bt_Name+" wurde ein BT-Objekt angelegt");
         this.order_management = new OrderManagement();
         this.status = "Nicht Verbunden";
         this.target = "-";
         this.checkpoint = this.park_position;
         this.last_checkpoint = "-";
-
+        this.puffer = "-";
+        
+        this.puffer_modus = false;
+        this.puffer_reserved = false;
         this.connect = false;
         this.inWaitList = false;
-        this.puffer_info = false;
         this.inPuffer = false;
     }
 
@@ -115,10 +126,12 @@ public class Bot implements IBot {
     public boolean Connect() {
 
         if (!connect) {
+        	logger.info("Verbindungsaufbau  für Bot "+bt_Name+" wird gestartet");
             this.controller.InputConsole("Verbindungsaufbau wird gestartet");
 
             if (bt.ConnectAgent()) {
                 connect = true;
+                logger.info("Verbindung zum Bot "+bt_Name+" hergestellt");
                 this.controller.InputConsole("Verbindung hergestellt!");
                 this.status = "Verbunden";
                 this.InfoUpdate();
@@ -129,9 +142,11 @@ public class Bot implements IBot {
             }
 
         } else {
+        	logger.info("Verbindung zum Bot "+bt_Name+" wird getrennt");
             this.controller.InputConsole("Verbindung trennen");
             connect = false;
             bt.CloseAgent();
+            logger.info("Verbindung zum Bot "+bt_Name+" trennt");
             this.controller.InputConsole("Verbindung getrennt");
         }
 
@@ -150,15 +165,22 @@ public class Bot implements IBot {
         this.InfoUpdate();
 
         if (bt.SendMessage(message))
-            this.controller.InputConsole("Nachricht " + message + " wurde erfolgreich gesendet");
+            {
+        	logger.info("Die Nachricht "+message+" für Bot "+bt_Name+" wurde erfolgreich gesendet");	
+        	this.controller.InputConsole("Nachricht " + message + " wurde erfolgreich gesendet");
+            }
         else
-            this.controller.InputConsole("Fehler beim senden der Nachricht " + message);
+        {
+        	logger.info("Die Nachricht "+message+" für Bot "+bt_Name+" konnte nicht gesendet werden");
+        	this.controller.InputConsole("Fehler beim senden der Nachricht " + message);
+        }
     }
 
     /**
      * Updatet die Position des Bots
      */
     private void UpdateCheckpoint(String check, String next_check) {
+    	logger.info("Bot "+bt_Name+" setzt seine aktuelle Position auf den Checkpunkt  "+check +" und seinenaechste auf "+next_check);
         this.last_checkpoint = this.checkpoint;
         this.checkpoint = check;
         this.next_checkpoint = next_check;
@@ -171,9 +193,11 @@ public class Bot implements IBot {
     private void Entrance(String check) {
         this.last_checkpoint = this.checkpoint;
         this.checkpoint = check;
+        logger.info("Position des Bots "+bt_Name+" wird auf "+check+" gesetzt");
         this.controller.UpdateMap(this.checkpoint, this.last_checkpoint, this.bt_Name);
         controller.InputConsole((this.bt_Name + " bereit zum Laden"));
-        bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Conintinue, MasterData.code_Load))));
+        logger.info("Bot "+bt_Name+" bekommt die genehmigung auf- oder abzuladen");
+        bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Continue, MasterData.code_Load))));
     }
 
 
@@ -183,20 +207,14 @@ public class Bot implements IBot {
     private void CheckAndSendForContinue() {
         if (this.controller.CheckForContinue(checkpoint, next_checkpoint, this)) {
             controller.InputConsole((this.bt_Name + ": Checkpoint:" + this.next_checkpoint + " Freigeben"));
-            if (this.puffer_info) {
-                List<Message> message = new ArrayList<Message>();
-                message.add((new Message(MasterData.code_Conintinue, this.next_checkpoint)));
-                message.add((new Message(MasterData.code_Reserved, MasterData.code_Conintinue)));
-
-                bt.SendMessage(Protokoll.MessageToString(message));
-                this.puffer_info = false;
-            } else
-                bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Conintinue, this.next_checkpoint))));
-            controller.InputConsole((this.bt_Name + "Freigabe gesendet"));
+            logger.info("Bot "+bt_Name+" wird die genehmigung für Checkpunkt "+next_checkpoint+" gesendet");
+            bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Continue, this.next_checkpoint))));
+ 
         } else {
+        	logger.info("Bot "+bt_Name+" bekommt  Checkpunkt "+next_checkpoint+" nicht freigegeben");
             controller.InputConsole((this.bt_Name + ": Checkpoint:" + this.next_checkpoint + " nicht Freigeben"));
             this.inWaitList = true;
-            this.m_waitList = new Message(MasterData.code_Conintinue, this.next_checkpoint);
+            this.m_waitList.add(new Message(MasterData.code_Continue, this.next_checkpoint));
         }
     }
 
@@ -208,17 +226,26 @@ public class Bot implements IBot {
      */
     public boolean ContinueAfterWaitList() {
         if (this.inWaitList && this.m_waitList != null) {
+        	logger.info("Bot "+bt_Name+" wird aus der Warteschlange geholt und bekommt die genehmigung für Checkpunkt "+next_checkpoint);
             controller.InputConsole((this.bt_Name + ": Checkpoint:" + this.next_checkpoint + " Freigeben"));
             bt.SendMessage(Protokoll.MessageToString(this.m_waitList));
-            controller.InputConsole((this.bt_Name + "Freigabe gesendet"));
+
 
             this.inWaitList = false;
-            this.m_waitList = null;
+            this.m_waitList.clear();
 
             return true;
-        } else if (this.inPuffer) {
-            bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Reserved, MasterData.code_Conintinue))));
-            this.inPuffer = false;
+        } else if (this.puffer_modus) {
+        	logger.info("Bot "+bt_Name+" wird aus der Warteschlange und dem Puffer geholt und bekommt die genehmigung weiter zu fahren ");
+        	controller.InputConsole((this.bt_Name + ": Checkpoint:" + this.next_checkpoint + " Freigeben"));
+            bt.SendMessage(Protokoll.MessageToString(this.m_waitList));
+
+        	
+        	this.puffer_modus = false;
+        	this.puffer_reserved = false;
+        	this.inPuffer = false;
+        	this.puffer = "-";
+        	this.m_waitList.clear();
             return true;
         }
         return false;
@@ -230,7 +257,7 @@ public class Bot implements IBot {
     public void HandleMessageInput(String message) {
         if (message != null && message != "") {
             controller.InputConsole(this.bt_Name + " (Eingang) : " + message);
-
+            logger.info("Von Bot "+bt_Name+" ist folgende nachrciht eingegangen: "+message);
             List<Message> m = Protokoll.StringToMessage(message);
 
             if (m.size() == 2) {
@@ -238,50 +265,77 @@ public class Bot implements IBot {
                 Message m2 = m.get(1);
 
                 if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
-                    this.UpdateCheckpoint(m1.getValue(), m2.getValue());
+                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach "+m2.getValue()+" will" );
+                	this.UpdateCheckpoint(m1.getValue(), m2.getValue());
                     this.CheckAndSendForContinue();
                 } else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_PostionLoad)) {
+                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und auf  "+m2.getValue()+" auf oder abladen will" );
                     if (m1.getValue().equals(m2.getValue())) {
                         this.Entrance(m1.getValue());
                     }
                 } else if (m1.getKey().equals(MasterData.code_FinishLoad) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
+                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf fertig mit auf- oder abladen ist  und nach "+m2.getValue()+" will" );
                     if (m1.getValue().equals(this.checkpoint)) {
                         this.next_checkpoint = m2.getValue();
                         this.CheckAndSendForContinue();
                     }
                 }else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_ParkPosition)) {
-                    this.Parking();
+                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und parkt" );
+                	this.Parking();
+                    
+                }else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_Puffer)) {
+                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und im Puffer wartet" );
+                	this.inPuffer = true;
+                	this.last_checkpoint = this.checkpoint;
+                	this.checkpoint = this.puffer; 
+                	controller.UpdateMap(checkpoint, last_checkpoint, this.bt_Name);
                 }
             } else if (m.size() == 3) {
                 Message m1 = m.get(0);
                 Message m2 = m.get(1);
                 Message m3 = m.get(2);
 
-                if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_NextCheckpoint) && m3.getKey().equals(MasterData.code_TestTarget)) {
-                    if (controller.TestEntranceForPuffer(m3.getValue())) { // PrÃ¼fen ob Lager belegt ist
-                        if (controller.EntranceReserved(m3.getValue())) { // Lager Reservieren!
-                            this.UpdateCheckpoint(m1.getValue(), m2.getValue());
-                            this.puffer_info = true;
-                            this.CheckAndSendForContinue();
-                            this.InfoUpdate();
+                if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_Puffer) && m3.getKey().equals(MasterData.code_TestTarget)) {
+                    
+                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach dem Ausgang  "+m3.getValue()+" will" );
+                	if (controller.TestEntranceForPuffer(m3.getValue())) { // PrÃ¼fen ob Lager belegt ist
+                        if (controller.CheckpointReserved(m3.getValue())) { // Lager Reservieren!
+                        	
+                        	List<Message> list = new ArrayList<Message>();
+                        	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                        	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
+
+                            bt.SendMessage(Protokoll.MessageToString(list));                        	
                             return;
                         }
                     }
 
-                    if (controller.IsNextPufferFree(m1.getValue())) { // PrÃ¼fen ob ein nÃ¤chster Puffer frei ist
-                        this.UpdateCheckpoint(m1.getValue(), m2.getValue());
-                        this.CheckAndSendForContinue();
-                        this.InfoUpdate();
-                        return;
-                    } else {
-                        controller.ToPufferAndSetOnWaitList(m1.getValue(), m3.getValue());
-                        bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_ToPuffer, this.bt_Name))));
-                        this.inPuffer = true;
-                    }
+                    this.controller.SetOnWaitList(m3.getValue(), this) ;            
+                	Checkpoint p = controller.NextFreePuffer();
+                	
+                	
+                	if(p != null)
+                	{
+                		List<Message> list = new ArrayList<Message>();
+                    	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                    	list.add((new Message(MasterData.code_Puffer, p.getName())));
+                    	
+                    	this.controller.CheckpointReserved(p.getName());
+                    	this.puffer_modus = true;
+                    	this.puffer_reserved = true;
+                    	this.puffer = p.getName();
 
+                        bt.SendMessage(Protokoll.MessageToString(list));
+                        
+                        list.clear();
+                    	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                    	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
+                    	
+                    	this.m_waitList = list;
+                	}
+
+                    return;                    
                 }
-
-
             }
             this.InfoUpdate();
         }
@@ -292,6 +346,7 @@ public class Bot implements IBot {
     {
     	this.last_checkpoint = this.checkpoint;
     	this.checkpoint = this.park_position; 
+    	logger.info("Bot "+bt_Name+"  befindet sich in der  Park-Position "+ park_position);
     	controller.UpdateMap(checkpoint, last_checkpoint, this.bt_Name);
     }
 
@@ -300,6 +355,7 @@ public class Bot implements IBot {
      */
     public void SendParkPosition() {
         bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_ParkPosition, this.park_position))));
+        logger.info("Bot "+bt_Name+" wurde die Park-Position "+ park_position+" gesendet");
         controller.InputConsole((this.bt_Name + ": Park Position " + this.park_position + " gesendet"));
     }
 
@@ -335,6 +391,21 @@ public class Bot implements IBot {
      */
     public String getCheckpoint() {
         return checkpoint;
+    }
+    
+    public boolean IsinPuffer()
+    {
+    	return this.inPuffer;
+    }
+    
+    public boolean HavePufferReserved()
+    {
+    	return this.puffer_reserved;
+    }
+    
+    public String GetPuffer()
+    {
+    	return this.puffer;
     }
 
 }

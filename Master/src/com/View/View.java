@@ -42,9 +42,9 @@ public class View extends JFrame {
         getContentPane().setLayout(null);
         this.setSize(1200, 680);
 
+        this.setClosedPoints();
         this.setCheckpoints();
-        this.setClosedPoints(); 
-        
+               
         JLabel lblNewLabel = new JLabel(new ImageIcon(View.class.getResource("/com/View/map.png")));
         //lblNewLabel.setIcon(new ImageIcon(View.class.getResource("/com/View/map.png")));
         lblNewLabel.setBounds(20, 10, 730, 419);
