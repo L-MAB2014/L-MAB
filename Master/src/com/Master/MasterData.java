@@ -52,9 +52,12 @@ public class MasterData {
 
     public static final String code_PostionLoad = "PL";
     public static final String code_PostionUnload = "PU";
+    
+    public static final String code_Puffer = "PF";
+    
     public static final String code_FinishLoad = "FL";
     public static final String code_FinishUnload = "FU";
-    public static final String code_Conintinue = "OK";
+    public static final String code_Continue = "OK";
     public static final String code_Load = "L";
     public static final String code_ParkPosition = "PP";
     public static final String code_ToPuffer = "TP";

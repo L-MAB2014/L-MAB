@@ -38,12 +38,18 @@ public class RoboterData {
     /**
      *
      */
-    public static final String code_Conintue = "OK";
+    public static final String code_Continue = "OK";
 
     /**
      *
      */
     public static final String code_Load = "L";
+    
+    public static final String code_ToPuffer = "TP";
+    public static final String code_TestTarget = "TT";
+    public static final String code_Reserved = "R";
+    
+    
 
     public static final int number_Checkpoints = 9;
     public static final int number_CheckpointsStore = 6;

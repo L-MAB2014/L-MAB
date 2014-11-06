@@ -21,6 +21,9 @@ public class Roboter implements IRoboter {
     private CheckpointList map;
     private Checkpoint park_Position;
     private Checkpoint position;
+    
+    private Checkpoint puffer_position;
+    
     private ColorSensor colorSensor;
     private NXTRegulatedMotor rightMotor;
     private NXTRegulatedMotor leftMotor;
@@ -33,7 +36,12 @@ public class Roboter implements IRoboter {
     private boolean IsParking;
 
     private boolean InitializePosition;
-
+    
+    private boolean licence_store;
+    private boolean licence_exit;
+    
+    private boolean toPuffer;
+    private boolean inPuffer;
 
     Roboter() {
         this.map = CreatCheckpoints.InitializeCheckpoints();
@@ -165,6 +173,11 @@ public class Roboter implements IRoboter {
 
         boolean isLoaded = false;
         boolean left_curve = false;
+        
+        this.licence_store  = false;
+        this.licence_exit = false;
+        this.toPuffer = false;
+        this.inPuffer = false;
 
         if (this.IsParking) {
             this.Unparking();
@@ -176,7 +189,11 @@ public class Roboter implements IRoboter {
         boolean b = true;
 
         while (nextCheckOther == null || nextCheckOther != this.park_Position || b) {
-            if (!isLoaded && nextCheckOther != null && nextCheckOther == check_store) {
+            
+		  if(this.IsOnPuffer() && !this.licence_exit){			  
+			  this.PufferModus(nextCheckOther, check_exit);
+			  
+		  } else if (!isLoaded && nextCheckOther != null && nextCheckOther == check_store) {
                 this.EntranceModus(nextCheckOther, nextCheckWay);
                 isLoaded = true;
                 left_curve = true;
@@ -197,7 +214,7 @@ public class Roboter implements IRoboter {
             }
 
             this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
-                    new Message(RoboterData.code_NextCheckpoint, nextCheckWay.getName()));
+                    new Message(RoboterData.code_NextCheckpoint, nextCheckWay.getName()));                       
 
             if (left_curve) {
                 left_curve = false;
@@ -238,8 +255,12 @@ public class Roboter implements IRoboter {
 
         this.position = this.park_Position;
 
-        this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
-                new Message(RoboterData.code_ParkPosition, position.getName()));
+        
+        List<Message> message = new ArrayList<Message>();
+        message.add(new Message(RoboterData.code_Checkpoint, position.getName()));
+        message.add(new Message(RoboterData.code_ParkPosition, position.getName()));
+
+        this.bt.SendPosition(Protokoll.MessageToString(message));
 
         this.IsParking = true;
 
@@ -271,6 +292,8 @@ public class Roboter implements IRoboter {
 
             e.printStackTrace();
         }
+        
+        this.last_checkpoint = System.currentTimeMillis();
     }
 
     private void SetParkPosition(Message message) {
@@ -297,7 +320,6 @@ public class Roboter implements IRoboter {
 
                 if (f == farbe) {
                     Sound.playTone(500, 500, 100);
-                    this.last_checkpoint = System.currentTimeMillis();
                     return;
                 }
             }
@@ -377,6 +399,61 @@ public class Roboter implements IRoboter {
         }
     }
 
+    
+    private void PufferModus(Checkpoint puffer, Checkpoint target)
+    {        
+    	if(this.puffer_position == null)
+    	{
+    		List<Message> message = new ArrayList<Message>();
+	         message.add(new Message(RoboterData.code_Checkpoint, position.getName()));
+	         message.add(new Message(RoboterData.code_Puffer, puffer.getName()));
+	         message.add(new Message(RoboterData.code_TestTarget, target.getName()));
+	    	
+	         this.bt.SendPosition(Protokoll.MessageToString(message));
+	         this.WaiteForOk();
+    	}
+    	
+    	if(!this.licence_exit && (puffer == this.puffer_position) && this.toPuffer)
+    	{
+    		
+    		this.CheckForContinue(new Message(RoboterData.code_Checkpoint, this.position.getName()),
+                    new Message(RoboterData.code_NextCheckpoint, puffer.getName()));
+    		
+    		this.links90();
+	        this.fahreZu( puffer.getColor());
+	        this.turn180();
+	        
+	        List<Message> message = new ArrayList<Message>();
+	         message.add(new Message(RoboterData.code_Checkpoint, puffer.getName()));
+	         message.add(new Message(RoboterData.code_Puffer, puffer.getName()));
+	         
+	         this.bt.SendPosition(Protokoll.MessageToString(message));
+	        
+	        this.inPuffer = true;
+	        
+	        this.leftMotor.stop(true);
+	        this.rightMotor.stop(true);
+
+	        while (!this.licence_exit) {
+	        	try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+	        }
+	        
+	        this.CheckForContinue(new Message(RoboterData.code_Checkpoint, puffer.getName()),
+                    new Message(RoboterData.code_NextCheckpoint, position.getName())); 
+	        
+	        this.fahreZu(position.getColor());
+
+	        this.links90();   
+	        this.toPuffer = false;
+	        this.park_Position = null;
+    	}
+    	    	
+    }
+    
     void links90() {
 
         this.leftMotor.stop(true);
@@ -386,7 +463,6 @@ public class Roboter implements IRoboter {
         leftMotor.setSpeed(200);
         rightMotor.rotate(450);
     }
-
     void rechts90() {
 
         this.leftMotor.stop(true);
@@ -421,6 +497,13 @@ public class Roboter implements IRoboter {
 
 
     }
+    
+    
+    private boolean IsOnPuffer()
+    {
+    	String check = this.position.getName();
+    	return (check.equals("C1") || check.equals("C2") || check.equals("C3"));
+    }
 
     public void InputMessage(String message) {
         LCD.drawString("N: " + message, 0, 0);
@@ -428,13 +511,36 @@ public class Roboter implements IRoboter {
 
         if (list.size() == 1) {
 
-            if (list.get(0).getKey().equals(RoboterData.code_Conintue)) {
+            if (list.get(0).getKey().equals(RoboterData.code_Continue)) {
                 this.wait = true;
 
             } else if (list.get(0).getKey().equals(RoboterData.code_ParkPosition)) {
-                this.SetParkPosition(list.get(0));
+                this.SetParkPosition(list.get(0));            
             }
-        } else if (list.size() == 3) {
+            
+        } else if (list.size() == 2) {
+        	Message m1 = list.get(0);
+            Message m2 = list.get(1);
+
+            if (m1.getKey().equals(RoboterData.code_Continue) && m2.getKey().equals(RoboterData.code_Reserved)) {
+            	
+            	 // Hat die Lizens für das Ausgangslager erhalten!
+            	 this.licence_exit = true;
+            	 this.wait = true;
+            }else if (m1.getKey().equals(RoboterData.code_Continue) && m2.getKey().equals(RoboterData.code_Puffer)) 
+            {
+            	LCD.drawString("PUFFER -->" + m2.getValue(), 0, 1);
+            	// Muss in den Puffer fahren
+            	this.puffer_position = this.map.getCheckpoint(m2.getValue());
+            	
+            	if(this.puffer_position != null)
+            	{          	 
+            		this.toPuffer = true;
+            		this.wait = true;
+            	}
+            }
+        
+        }else if (list.size() == 3) {
             this.manager.addOrder(list);
         } else {
             //Fehlerbehbung

@@ -34,8 +34,8 @@ public interface IController {
      */
     abstract boolean CheckForContinue(String checkpoint, String next_checkpoint, Bot bot);
 
-    abstract boolean IsNextPufferFree(String puffer);
     abstract boolean TestEntranceForPuffer(String entrance);
-    abstract boolean EntranceReserved(String entrance);
-    abstract void ToPufferAndSetOnWaitList(String check, String entrance);
+    abstract Checkpoint NextFreePuffer();
+    abstract boolean CheckpointReserved(String entrance);
+    abstract void SetOnWaitList(String check, Bot bot);
 }

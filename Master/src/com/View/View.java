@@ -2,11 +2,19 @@ package com.View;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class View extends JFrame {
 
+	/**
+	 * logger
+	 */
+	private static Logger logger = Logger.getAnonymousLogger();
+	
     JMenuItem menuStart;
     JMenuItem menuOeffnen;
     JMenuItem menuSpeichern;
@@ -27,15 +35,16 @@ public class View extends JFrame {
     private JButton btn_stopp;
     private JTextArea console;
     private HashMap<String, JLabel> checkmap;
-
+    HashMap<String, JRadioButton> closedmap;
     public View() {
         setResizable(false);
 
         getContentPane().setLayout(null);
         this.setSize(1200, 680);
 
+        this.setClosedPoints();
         this.setCheckpoints();
-
+               
         JLabel lblNewLabel = new JLabel(new ImageIcon(View.class.getResource("/com/View/map.png")));
         //lblNewLabel.setIcon(new ImageIcon(View.class.getResource("/com/View/map.png")));
         lblNewLabel.setBounds(20, 10, 730, 419);
@@ -252,17 +261,32 @@ public class View extends JFrame {
     }
 
     public synchronized void UpdateCheckpoint(String checkpoint, String last_checkpoint, String bot_name) {
-        JLabel label = this.checkmap.get(checkpoint);
+	      		
+       if(checkpoint != null)
+ 	   {	
+    		JLabel label = this.checkmap.get(checkpoint);
+	
+	        if (label != null) {
+	            label.setText(bot_name);
+	        }
+ 	   }
 
-        if (label != null) {
-            label.setText(bot_name);
-        }
+	   if(last_checkpoint != null)
+	   { 	
+		   JLabel label = this.checkmap.get(last_checkpoint);
+	
+	        if (label != null) {
+	            if (bot_name.equals(label.getText()))
+	                label.setText("");
+	        }
+	   }
+    }
+    
+    public synchronized void UpdateClosedpoint(String checkpoint, boolean b) {
+        JRadioButton radio = this.closedmap.get(checkpoint);
 
-        label = this.checkmap.get(last_checkpoint);
-
-        if (label != null) {
-            if (bot_name.equals(label.getText()))
-                label.setText("");
+        if (radio != null) {
+            radio.setSelected(b);
         }
     }
 
@@ -420,5 +444,226 @@ public class View extends JFrame {
         lblpu1.setBounds(491, 403, 46, 14);
         getContentPane().add(lblpu1);
         checkmap.put("PU1", lblpu1);
+    }
+    
+    private void setClosedPoints() {
+    	
+    	this.closedmap = new HashMap<String, JRadioButton>();
+    	
+    	 JRadioButton radioP1 = new JRadioButton();
+    	 radioP1.setBounds(78, 310, 21, 14);
+    	 radioP1.setBackground(Color.WHITE);
+    	 radioP1.setEnabled(false);
+         getContentPane().add(radioP1);
+         closedmap.put("P1",radioP1);
+         
+         JRadioButton radioP2 = new JRadioButton();
+    	 radioP2.setBounds(78, 247, 21, 14);
+    	 radioP2.setBackground(Color.WHITE);
+    	 radioP2.setEnabled(false);
+         getContentPane().add(radioP2);
+         closedmap.put("P2",radioP2);
+         
+         JRadioButton radioP3 = new JRadioButton();
+    	 radioP3.setBounds(78, 188, 21, 14);
+    	 radioP3.setBackground(Color.WHITE);
+    	 radioP3.setEnabled(false);
+         getContentPane().add(radioP3);
+         closedmap.put("P3",radioP3);
+         
+         JRadioButton radioP4 = new JRadioButton();
+    	 radioP4.setBounds(78, 127, 21, 14);
+    	 radioP4.setBackground(Color.WHITE);
+    	 radioP4.setEnabled(false);
+         getContentPane().add(radioP4);
+         closedmap.put("P4",radioP4);
+         
+         //----------------------------------------------
+         
+         JRadioButton radioPF1 = new JRadioButton();
+    	 radioPF1.setBounds(640, 151, 21, 14);
+    	 radioPF1.setBackground(Color.WHITE);
+    	 radioPF1.setEnabled(false);
+         getContentPane().add(radioPF1);
+         closedmap.put("PF1",radioPF1);
+         
+         JRadioButton radioPF2 = new JRadioButton();
+    	 radioPF2.setBounds(640, 213, 21, 14);
+    	 radioPF2.setBackground(Color.WHITE);
+    	 radioPF2.setEnabled(false);
+         getContentPane().add(radioPF2);
+         closedmap.put("PF2",radioPF2);
+         
+         JRadioButton radioPF3 = new JRadioButton();
+    	 radioPF3.setBounds(640, 271, 21, 14);
+    	 radioPF3.setBackground(Color.WHITE);
+    	 radioPF3.setEnabled(false);
+         getContentPane().add(radioPF3);
+         closedmap.put("PF3",radioPF3);
+         
+       //----------------------------------------------
+        
+         JRadioButton radioCP1 = new JRadioButton();
+    	 radioCP1.setBounds(127, 340, 21, 14);
+    	 radioCP1.setBackground(Color.WHITE);
+    	 radioCP1.setEnabled(false);
+         getContentPane().add(radioCP1);
+         closedmap.put("CP1",radioCP1);
+         
+         JRadioButton radioCP2 = new JRadioButton();
+    	 radioCP2.setBounds(127, 280, 21, 14);
+    	 radioCP2.setBackground(Color.WHITE);
+    	 radioCP2.setEnabled(false);
+         getContentPane().add(radioCP2);
+         closedmap.put("CP2",radioCP2);
+         
+         JRadioButton radioCP3 = new JRadioButton();
+    	 radioCP3.setBounds(127, 221, 21, 14);
+    	 radioCP3.setBackground(Color.WHITE);
+    	 radioCP3.setEnabled(false);
+         getContentPane().add(radioCP3);
+         closedmap.put("CP3",radioCP3);
+         
+         JRadioButton radioCP4 = new JRadioButton();
+    	 radioCP4.setBounds(127, 160, 21, 14);
+    	 radioCP4.setBackground(Color.WHITE);
+    	 radioCP4.setEnabled(false);
+         getContentPane().add(radioCP4);
+         closedmap.put("CP4",radioCP4);
+         
+   //----------------------------------------------
+         
+         JRadioButton radioC1 = new JRadioButton();
+    	 radioC1.setBounds(601, 120, 21, 14);
+    	 radioC1.setBackground(Color.WHITE);
+    	 radioC1.setEnabled(false);
+         getContentPane().add(radioC1);
+         closedmap.put("C1",radioC1);
+         
+         JRadioButton radioC2 = new JRadioButton();
+    	 radioC2.setBounds(601, 182, 21, 14);
+    	 radioC2.setBackground(Color.WHITE);
+    	 radioC2.setEnabled(false);
+         getContentPane().add(radioC2);
+         closedmap.put("C2",radioC2);
+         
+         JRadioButton radioC3 = new JRadioButton();
+    	 radioC3.setBounds(601, 242, 21, 14);
+    	 radioC3.setBackground(Color.WHITE);
+    	 radioC3.setEnabled(false);
+         getContentPane().add(radioC3);
+         closedmap.put("C3",radioC3);
+         
+       //----------------------------------------------
+         
+         JRadioButton radioS1 = new JRadioButton();
+    	 radioS1.setBounds(140, 93, 21, 14);
+    	 radioS1.setBackground(Color.WHITE);
+    	 radioS1.setEnabled(false);
+         getContentPane().add(radioS1);
+         closedmap.put("S1",radioS1);
+         
+         JRadioButton radioS2 = new JRadioButton();
+    	 radioS2.setBounds(210, 93, 21, 14);
+    	 radioS2.setBackground(Color.WHITE);
+    	 radioS2.setEnabled(false);
+         getContentPane().add(radioS2);
+         closedmap.put("S2",radioS2);
+         
+         JRadioButton radioS3 = new JRadioButton();
+    	 radioS3.setBounds(285, 93, 21, 14);
+    	 radioS3.setBackground(Color.WHITE);
+    	 radioS3.setEnabled(false);
+         getContentPane().add(radioS3);
+         closedmap.put("S3",radioS3);
+         
+         JRadioButton radioS4 = new JRadioButton();
+    	 radioS4.setBounds(360, 93, 21, 14);
+    	 radioS4.setBackground(Color.WHITE);
+    	 radioS4.setEnabled(false);
+         getContentPane().add(radioS4);
+         closedmap.put("S4",radioS4);
+         
+         JRadioButton radioS5 = new JRadioButton();
+    	 radioS5.setBounds(435, 93, 21, 14);
+    	 radioS5.setBackground(Color.WHITE);
+    	 radioS5.setEnabled(false);
+         getContentPane().add(radioS5);
+         closedmap.put("S5",radioS5);
+         
+         JRadioButton radioS6 = new JRadioButton();
+    	 radioS6.setBounds(515, 93, 21, 14);
+    	 radioS6.setBackground(Color.WHITE);
+    	 radioS6.setEnabled(false);
+         getContentPane().add(radioS6);
+         closedmap.put("S6",radioS6);
+         
+ //----------------------------------------------
+         
+         JRadioButton radioE1 = new JRadioButton();
+    	 radioE1.setBounds(550, 340, 21, 14);
+    	 radioE1.setBackground(Color.WHITE);
+    	 radioE1.setEnabled(false);
+         getContentPane().add(radioE1);
+         closedmap.put("E1",radioE1);
+         
+         JRadioButton radioE2 = new JRadioButton();
+    	 radioE2.setBounds(455, 340, 21, 14);
+    	 radioE2.setBackground(Color.WHITE);
+    	 radioE2.setEnabled(false);
+         getContentPane().add(radioE2);
+         closedmap.put("E2",radioE2);
+         
+         JRadioButton radioE3 = new JRadioButton();
+    	 radioE3.setBounds(355, 340, 21, 14);
+    	 radioE3.setBackground(Color.WHITE);
+    	 radioE3.setEnabled(false);
+         getContentPane().add(radioE3);
+         closedmap.put("E3",radioE3);
+         
+         JRadioButton radioE4 = new JRadioButton();
+    	 radioE4.setBounds(265, 340, 21, 14);
+    	 radioE4.setBackground(Color.WHITE);
+    	 radioE4.setEnabled(false);
+         getContentPane().add(radioE4);
+         closedmap.put("E4",radioE4);
+ //----------------------------------------------
+         
+         JRadioButton radioPU1 = new JRadioButton();
+    	 radioPU1.setBounds(473, 365, 21, 14);
+    	 radioPU1.setBackground(Color.WHITE);
+    	 radioPU1.setEnabled(false);
+         getContentPane().add(radioPU1);
+         closedmap.put("PU1",radioPU1);
+         
+         JRadioButton radioPU2 = new JRadioButton();
+    	 radioPU2.setBounds(280, 365, 21, 14);
+    	 radioPU2.setBackground(Color.WHITE);
+    	 radioPU2.setEnabled(false);
+         getContentPane().add(radioPU2);
+         closedmap.put("PU2",radioPU2);
+         
+ //----------------------------------------------
+         
+         JRadioButton radioPL1 = new JRadioButton();
+    	 radioPL1.setBounds(195, 58, 21, 14);
+    	 radioPL1.setBackground(Color.WHITE);
+    	 radioPL1.setEnabled(false);
+         getContentPane().add(radioPL1);
+         closedmap.put("PL1",radioPL1);
+         
+         JRadioButton radioPL2 = new JRadioButton();
+    	 radioPL2.setBounds(343, 58, 21, 14);
+    	 radioPL2.setBackground(Color.WHITE);
+    	 radioPL2.setEnabled(false);
+         getContentPane().add(radioPL2);
+         closedmap.put("PL2",radioPL2);
+         
+         JRadioButton radioPL3 = new JRadioButton();
+    	 radioPL3.setBounds(500, 58, 21, 14);
+    	 radioPL3.setBackground(Color.WHITE);
+    	 radioPL3.setEnabled(false);
+         getContentPane().add(radioPL3);
+         closedmap.put("PL3",radioPL3);
     }
 }
