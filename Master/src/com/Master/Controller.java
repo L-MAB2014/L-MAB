@@ -145,14 +145,17 @@ public class Controller implements IController {
 
     private boolean EditCheckpointsForContinue(Checkpoint checkpoint, Checkpoint next_checkpoint, Bot bot) {
     	logger.info("Bot "+ bot.getBt_Name() +" prüft ob Checkpoint "+ next_checkpoint.getName()+"  gesperrt ist");
+    	
     	if (!next_checkpoint.isClosed()) {
     		logger.info("Bot "+ bot.getBt_Name() +" sperrt den  Checkpoint "+ next_checkpoint.getName());
         	next_checkpoint.setClosed(true);
         	this.view.UpdateClosedpoint(next_checkpoint.getName(), true);
         	logger.info("Warteschlange des Checkpunkts  "+ checkpoint.getName() + " von Bot "+ bot.getBt_Name() +" wird ueberprueft");
-            if (checkpoint.isBotInWaitList()) {
+           
+        	if (checkpoint.isBotInWaitList()) {
             	logger.info("Bots in Warteschlange des Checkpunkts  "+ checkpoint.getName());
-                if (checkpoint.isReserved()) {
+                
+            	if (checkpoint.isReserved()) {
                     checkpoint.setClosed(false);
                     this.view.UpdateClosedpoint(checkpoint.getName(), false);
                     Bot waitBot = checkpoint.getFirstOnWaitList();
@@ -178,9 +181,12 @@ public class Controller implements IController {
                 this.view.UpdateClosedpoint(checkpoint.getName(), false);
             }
             return true;
+            
         } else {
-            if (!next_checkpoint.setBotOnWaitList(bot)) {
-                if (!next_checkpoint.isBotInWaitList() && !next_checkpoint.isClosed()) {
+           
+        	if (!next_checkpoint.setBotOnWaitList(bot)) {
+               
+            	if (!next_checkpoint.isBotInWaitList() && !next_checkpoint.isClosed()) {
                     checkpoint.setClosed(false);   
                     logger.info("Checkpoint "+ next_checkpoint.getName()+ " wird enstperrt (Bot: "+bot.getBt_Name()+")");
                     next_checkpoint.setClosed(true);

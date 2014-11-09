@@ -42,6 +42,8 @@ public class Roboter implements IRoboter {
     
     private boolean toPuffer;
     private boolean inPuffer;
+    
+    private boolean way_check;
 
     Roboter() {
         this.map = CreatCheckpoints.InitializeCheckpoints();
@@ -174,14 +176,18 @@ public class Roboter implements IRoboter {
         boolean isLoaded = false;
         boolean left_curve = false;
         
+        this.way_check = true;
+        
         this.licence_store  = false;
         this.licence_exit = false;
         this.toPuffer = false;
         this.inPuffer = false;
 
-        if (this.IsParking) {
-            this.Unparking();
-        }
+       this.Start_Modus(check_store);
+        
+//        if (this.IsParking) {
+//            this.Unparking();
+//        }
 
         Checkpoint nextCheckWay = position.getNext_WayCheckpoint();
         Checkpoint nextCheckOther = position.getNext_OtherCheckpoint();
@@ -239,7 +245,10 @@ public class Roboter implements IRoboter {
 
 
     }
-
+    
+   
+    
+    
     private void Parking() {
         LCD.drawString("PARKEN!! ", 0, 2);
 
@@ -400,6 +409,40 @@ public class Roboter implements IRoboter {
     }
 
     
+    private void Start_Modus(Checkpoint check_store)
+    {
+    	List<Message> message = new ArrayList<Message>();
+        message.add(new Message(RoboterData.code_Checkpoint, this.position.getName()));
+        message.add(new Message(RoboterData.code_ToPark, this.park_Position.getName()));
+        message.add(new Message(RoboterData.code_TestTarget, check_store.getName()));
+   	
+        this.bt.SendPosition(Protokoll.MessageToString(message));
+        this.WaiteForOk();
+
+        if(this.licence_store)
+        {
+        	if (this.IsParking) {
+                this.Unparking();
+            }
+        }else
+        {
+        	if (!this.IsParking) {
+                this.Parking();
+            }
+        	
+        	while (!this.licence_store) {
+	        	try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+	        }
+        	
+        	this.Unparking();
+        }
+        
+    }
+    
     private void PufferModus(Checkpoint puffer, Checkpoint target)
     {        
     	if(this.puffer_position == null)
@@ -524,9 +567,13 @@ public class Roboter implements IRoboter {
 
             if (m1.getKey().equals(RoboterData.code_Continue) && m2.getKey().equals(RoboterData.code_Reserved)) {
             	
-            	 // Hat die Lizens für das Ausgangslager erhalten!
-            	 this.licence_exit = true;
-            	 this.wait = true;
+            	if(this.way_check)
+            		this.licence_store = true;
+            	else
+            		this.licence_exit = true;
+            	
+            	this.way_check = !this.way_check;
+            	this.wait = true;
             }else if (m1.getKey().equals(RoboterData.code_Continue) && m2.getKey().equals(RoboterData.code_Puffer)) 
             {
             	LCD.drawString("PUFFER -->" + m2.getValue(), 0, 1);
@@ -538,6 +585,9 @@ public class Roboter implements IRoboter {
             		this.toPuffer = true;
             		this.wait = true;
             	}
+            }else if (m1.getKey().equals(RoboterData.code_Continue) && m2.getKey().equals(RoboterData.code_ToPark))
+            {           	
+            	this.wait = true;
             }
         
         }else if (list.size() == 3) {

@@ -335,6 +335,36 @@ public class Bot implements IBot {
                 	}
 
                     return;                    
+                }else if(m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_ToPark) && m3.getKey().equals(MasterData.code_TestTarget)) {
+                
+                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach dem Eingang  "+m3.getValue()+" will" );
+                	List<Message> list = new ArrayList<Message>();
+                	
+                	if (controller.TestEntranceForPuffer(m3.getValue())) { // Prüfen ob Lager belegt ist
+                        if (controller.CheckpointReserved(m3.getValue())) { // Lager Reservieren!
+                        	
+                        	
+                        	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                        	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
+
+                            bt.SendMessage(Protokoll.MessageToString(list));                        	
+                            return;
+                        }
+                    }
+                	
+                	this.controller.SetOnWaitList(m3.getValue(), this) ;  
+                	this.puffer_modus = true;	
+                	
+                	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                	list.add((new Message(MasterData.code_ToPark, this.park_position)));
+                	bt.SendMessage(Protokoll.MessageToString(list));
+                	
+                	
+                	list.clear();
+                	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
+                	
+                	this.m_waitList = list;
                 }
             }
             this.InfoUpdate();

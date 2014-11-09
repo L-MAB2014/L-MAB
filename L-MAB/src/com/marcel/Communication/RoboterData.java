@@ -46,6 +46,9 @@ public class RoboterData {
     public static final String code_Load = "L";
     
     public static final String code_ToPuffer = "TP";
+    
+    public static final String code_ToPark = "P";
+    
     public static final String code_TestTarget = "TT";
     public static final String code_Reserved = "R";
     
