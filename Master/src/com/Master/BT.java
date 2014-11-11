@@ -220,7 +220,7 @@ public class BT {
 
             } catch (Exception e) {
 
-            	logger.info("Bot "+bt_Name+"-(MessageFromBot()):"+e);
+            	logger.info("Bot "+bt_Name+"-(InputChannel-run()):"+e);
             }
             logger.info("Der Input Channel für Bot "+bt_Name+" wurde beendet");
             controller.InputConsole(bt_Name + ": Input-Cahnnel beendet");

@@ -105,6 +105,9 @@ public class Bot implements IBot {
         this.bt = new BT(this.bt_Name, this.controller, this);
         logger.info("Fuer Bot "+bt_Name+" wurde ein BT-Objekt angelegt");
         this.order_management = new OrderManagement();
+        
+        this.m_waitList = new ArrayList<Message>();
+        
         this.status = "Nicht Verbunden";
         this.target = "-";
         this.checkpoint = this.park_position;

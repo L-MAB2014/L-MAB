@@ -16,8 +16,8 @@ public class Roboter implements IRoboter {
     float offset;
     float error;
     float turn;
-    float kp_init = (1.3f / 185);
-    float kp = 0;
+    
+    float kp = 10;
     private CheckpointList map;
     private Checkpoint park_Position;
     private Checkpoint position;
@@ -25,6 +25,10 @@ public class Roboter implements IRoboter {
     private Checkpoint puffer_position;
     
     private ColorSensor colorSensor;
+    private LightSensor lightSensor;
+    
+    
+    
     private NXTRegulatedMotor rightMotor;
     private NXTRegulatedMotor leftMotor;
     private BTConnect bt;
@@ -59,6 +63,9 @@ public class Roboter implements IRoboter {
         this.bt = new BTConnect(this);
 
         this.colorSensor = new ColorSensor(SensorPort.S1);
+        this.lightSensor = new LightSensor(SensorPort.S2);
+        
+        this.lightSensor.setFloodlight(true);
 
         this.rightMotor = new NXTRegulatedMotor(MotorPort.C);
         this.leftMotor = new NXTRegulatedMotor(MotorPort.A);
@@ -141,7 +148,7 @@ public class Roboter implements IRoboter {
 
         Button.waitForAnyPress();
 
-        high = colorSensor.getLightValue();
+        high = this.lightSensor.getLightValue();
 
         LCD.drawString("Hell: " + high, 0, 0);
 
@@ -152,7 +159,7 @@ public class Roboter implements IRoboter {
 
         Button.waitForAnyPress();
 
-        low = colorSensor.getLightValue();
+        low = this.lightSensor.getLightValue();
 
         LCD.drawString("Dunkel: " + low, 0, 0);
 
@@ -161,7 +168,7 @@ public class Roboter implements IRoboter {
         LCD.clear();
 
         offset = (high + low) / 2;
-        kp = kp_init * offset;
+
         LCD.drawString("Mitte: " + offset, 0, 0);
 
         LCD.drawString("Init Fertig", 0, 2);
@@ -322,7 +329,7 @@ public class Roboter implements IRoboter {
         rightMotor.forward();
 
         while (!this.IsEnding) {
-            light = colorSensor.getLightValue();
+            light = this.lightSensor.getLightValue();
             int f = this.colorSensor.getColorID();
 
             if ((System.currentTimeMillis() - this.last_checkpoint) > 1000) {
