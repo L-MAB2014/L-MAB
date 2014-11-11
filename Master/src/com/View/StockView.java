@@ -24,9 +24,9 @@ import javax.swing.LayoutStyle;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class ViewStocksimulator extends JFrame {
+public class StockView extends JFrame {
     private static final long serialVersionUID = 6839619030110044237L;
-    public ViewStocksimulator(StockModel model) {
+    public StockView(StockModel model) {
         super("L-MAB StockSimulator v1.0.0");
         mModel = model;
         setSize(1200, 350);
@@ -180,7 +180,7 @@ public class ViewStocksimulator extends JFrame {
         @Override
         public void actionPerformed(ActionEvent object) {
             if(object.getSource() == mMIQuit) {
-                ViewStocksimulator.this.dispose();
+                StockView.this.dispose();
             }
             else if(object.getSource() == mMISave) {
                 final String fileName = "Stock.txt";

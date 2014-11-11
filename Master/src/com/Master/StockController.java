@@ -1,13 +1,13 @@
 package com.Master;
 
-import com.View.ViewStocksimulator;
+import com.View.StockView;
 
 public class StockController {
 	StockModel mModel;
-	ViewStocksimulator mView;
+	StockView mView;
 
 	public StockController() {
 		mModel = new StockModel();
-		mView = new ViewStocksimulator(mModel);
+		mView = new StockView(mModel);
 	}
 }
