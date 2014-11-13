@@ -271,17 +271,23 @@ public class Bot implements IBot {
                 	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach "+m2.getValue()+" will" );
                 	this.UpdateCheckpoint(m1.getValue(), m2.getValue());
                     this.CheckAndSendForContinue();
-                } else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_PostionLoad)) {
+                } else if (m1.getKey().equals(MasterData.code_Checkpoint) && (m2.getKey().equals(MasterData.code_PostionLoad ) || m2.getKey().equals(MasterData.code_PostionUnload ))) {
                 	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und auf  "+m2.getValue()+" auf oder abladen will" );
                     if (m1.getValue().equals(m2.getValue())) {
                         this.Entrance(m1.getValue());
                     }
                 } else if (m1.getKey().equals(MasterData.code_FinishLoad) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
-                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf fertig mit auf- oder abladen ist  und nach "+m2.getValue()+" will" );
-                    if (m1.getValue().equals(this.checkpoint)) {
-                        this.next_checkpoint = m2.getValue();
-                        this.CheckAndSendForContinue();
-                    }
+                	logger.info("Nachricht von Bot "+bt_Name+" das  dieser fertig mit aufladen  ist und nach "+m2.getValue()+" will" );
+                    this.next_checkpoint = m2.getValue();
+                    this.controller.OrderLoad(this.order_management.getById(m1.getValue()));
+                    this.CheckAndSendForContinue();
+                    
+                }else if (m1.getKey().equals(MasterData.code_FinishUnload) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
+                	logger.info("Nachricht von Bot "+bt_Name+" das dieser fertig  ist mit abladen   und nach "+m2.getValue()+" will" );
+                    this.next_checkpoint = m2.getValue();
+                    this.controller.OrderUnload(this.order_management.getById(m1.getValue()), this);
+                    this.CheckAndSendForContinue();
+                    
                 }else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_ParkPosition)) {
                 	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und parkt" );
                 	this.Parking();

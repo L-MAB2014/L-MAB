@@ -177,8 +177,8 @@ public class Roboter implements IRoboter {
     }
 
     private void MakeOrder(Order order) {
-        Checkpoint check_store = map.getCheckpoint("PL" + order.getStore_place());
-        Checkpoint check_exit = map.getCheckpoint("PU" + order.getExit_place());
+        Checkpoint check_store = map.getCheckpoint(order.getStore_place());
+        Checkpoint check_exit = map.getCheckpoint(order.getExit_place());
 
         boolean isLoaded = false;
         boolean left_curve = false;
@@ -207,7 +207,7 @@ public class Roboter implements IRoboter {
 			  this.PufferModus(nextCheckOther, check_exit);
 			  
 		  } else if (!isLoaded && nextCheckOther != null && nextCheckOther == check_store) {
-                this.EntranceModus(nextCheckOther, nextCheckWay);
+                this.EntranceModus(nextCheckOther, nextCheckWay, order.getId(), true);
                 isLoaded = true;
                 left_curve = true;
 
@@ -216,7 +216,7 @@ public class Roboter implements IRoboter {
                 nextCheckOther = position.getNext_OtherCheckpoint();
 
             } else if (isLoaded && nextCheckOther != null && nextCheckOther == check_exit) {
-                this.EntranceModus(nextCheckOther, nextCheckWay);
+                this.EntranceModus(nextCheckOther, nextCheckWay, order.getId(), false);
                 isLoaded = false;
                 left_curve = true;
 
@@ -378,7 +378,7 @@ public class Roboter implements IRoboter {
         }
     }
 
-    private void EntranceModus(Checkpoint entrance, Checkpoint exit) {
+    private void EntranceModus(Checkpoint entrance, Checkpoint exit, String order_id, boolean status) {
         try {
             this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
                     new Message(RoboterData.code_NextCheckpoint, entrance.getName()));
@@ -388,7 +388,7 @@ public class Roboter implements IRoboter {
             this.fahreZu(entrance.getColor());
 
             this.CheckForContinue(new Message(RoboterData.code_Checkpoint, entrance.getName()),
-                    new Message(RoboterData.code_PostionLoad, entrance.getName()));
+                    new Message((status ? RoboterData.code_PostionLoad : RoboterData.code_PostionUnload), entrance.getName()));
 
             this.position = entrance;
 
@@ -400,7 +400,7 @@ public class Roboter implements IRoboter {
             Sound.playTone(500, 500, 100);
 
             List<Message> message = new ArrayList<Message>();
-            message.add(new Message(RoboterData.code_FinishLoad, this.position.getName()));
+            message.add(new Message((status ? RoboterData.code_FinishLoad : RoboterData.code_FinishUnload), order_id));
             message.add(new Message(RoboterData.code_NextCheckpoint, exit.getName()));
 
             this.rechts90();

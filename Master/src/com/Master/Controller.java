@@ -1,5 +1,6 @@
 package com.Master;
 
+import com.Simulator.Simulator;
 import com.View.View;
 
 import java.awt.event.ActionEvent;
@@ -9,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class Controller implements IController {
+public class Controller implements IController, IStockInput {
 
 	/**
 	 * logger
@@ -35,6 +36,11 @@ public class Controller implements IController {
      * Enth√ºllt alle Checkpoints des Lagers
      */
     private HashMap<String, Checkpoint> checkpoints;
+    
+    /**
+     * Enth√ºllt alle Ein und Ausg‰nge des Lagers
+     */
+    private HashMap<String, Stock> stocks;
 
     //TODO Kann sp√§ter Weg
     private int order_ID;
@@ -50,9 +56,7 @@ public class Controller implements IController {
         
         logger.info("Oberflaeche wird geˆffnet und und die Actionlistener gesetzt");
         
-        this.view.addControlBotListener(new ControlBotListener());
         this.view.addNewBotListener(new NewBotListener());
-        this.view.addConrtolOrderListener(new ControlOrderListener());
         this.view.addNewOrderListener(new NewOrderListener());
         this.view.addStoppListener(new StoppListener());
 
@@ -64,6 +68,17 @@ public class Controller implements IController {
         logger.info("Checkpoints (Map) werden Initialisiert");
         this.checkpoints = CreatCheckpoints.InitializeCheckpoints();
         this.bots = new ArrayList<Bot>();
+        
+        this.stocks = new HashMap<String, Stock>();
+        
+        this.stocks.put("PL1", new Stock(this.checkpoints.get("PL1")));
+        this.stocks.put("PL2", new Stock(this.checkpoints.get("PL2")));
+        this.stocks.put("PL3", new Stock(this.checkpoints.get("PL3")));
+        
+        this.stocks.put("PU1", new Stock(this.checkpoints.get("PU1")));
+        this.stocks.put("PU2", new Stock(this.checkpoints.get("PU2")));
+        
+        
     }
 
     public static void main(String[] args) {
@@ -83,7 +98,7 @@ public class Controller implements IController {
      * @see com.Master.IController#UpdateTable(int, java.lang.String[])
      */
     public void UpdateTable(int row, String[] text) {
-        view.UpdateTable(row, text);
+        view.UpdateBotTable(row, text);
     }
 
     /* (non-Javadoc)
@@ -245,17 +260,56 @@ public class Controller implements IController {
         logger.info("Checkpoint "+ check.getName()+" konnte nicht reserviert werden, da dieser schon reserviert ist");
         return false;
     }
-
-
-    /**
-     * ActionListener zum Bet√§tigen des Bots Verwalten-Buttons
-     */
-    class ControlBotListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-       	
-        	logger.info("Der Button 'Bots Verwalten' wurde betaetigt");
-        }
+    
+    public synchronized void ObjektToStock(String id, String stock, String target)
+    {
+    	Order order = new Order(id,stock,target);
+    	if (counter >= bots.size()) {
+		    counter = 0;
+		}
+		
+    	Bot bot = this.bots.get(counter);
+    	counter++;
+    	bot.NewOrder(order);
+    	
+    	Stock s = stocks.get(stock);
+    	s.addOrder(order);
+    	view.InputStoreTable(s.getName(), id, target, bot != null ? bot.getBt_Name():"-");
+    	
+    	
     }
+    
+    public synchronized void OrderLoad(Order order)
+    {
+    	try{
+    		view.DeleteFirstStoreTable(order.getStore_place(), order.getId());
+    	}catch(Exception e)
+    	{
+    		logger.info("OrderLoad : "+e);
+    	}
+    }
+    
+    public synchronized void OrderUnload(Order order, Bot bot)
+    {
+    	try{
+    		view.InputExitTable(order.getExit_place(), order.getId(), order.getExit_place(), bot.getBt_Name());
+		}catch(Exception e)
+		{
+			logger.info("OrderUnload : "+e);
+		}
+    }
+    
+    
+    
+//    /**
+//     * ActionListener zum Bet√§tigen des Bots Verwalten-Buttons
+//     */
+//    class ControlBotListener implements ActionListener {
+//        public void actionPerformed(ActionEvent e) {
+//       	
+//        	logger.info("Der Button 'Bots Verwalten' wurde betaetigt");
+//        }
+//    }
 
     /**
      * ActionListener zum Bet√§tigen des Neuen Bots -Buttons
@@ -271,7 +325,7 @@ public class Controller implements IController {
                 if (!ExitsBot(bot_name)) {
                 	logger.info("Ein Bot mit dem  Namen "+ bot_name+" wird angelegt");
                     Bot bot = new Bot(controller, bot_name, bots.size(), ("P" + (bots.size() + 1)));
-                    view.InputTable(new String[]{"" + bots.size(), bot_name, "", "", "", ""});
+                    view.InputBotTable(new String[]{"" + bots.size(), bot_name, "", "", "", ""});
                     logger.info("Eine Verbindung zum  Bot  "+ bot_name+" wird aufgebaut");
                     if (bot.Connect()) {
                     	logger.info("Verbindung zum  Bot  "+ bot_name+" erfolgreich hergestellt");
@@ -294,14 +348,14 @@ public class Controller implements IController {
         }
     }
 
-    /**
-     * ActionListener zum Bet√§tigen des Auftrags Verwaltungs-Buttons
-     */
-    class ControlOrderListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-        	logger.info("Der Button 'Auftrags Verwaltung' wurde betaetigt");
-        }
-    }
+//    /**
+//     * ActionListener zum Bet√§tigen des Auftrags Verwaltungs-Buttons
+//     */
+//    class ControlOrderListener implements ActionListener {
+//        public void actionPerformed(ActionEvent e) {
+//        	logger.info("Der Button 'Auftrags Verwaltung' wurde betaetigt");
+//        }
+//    }
 
     /**
      * ActionListener zum Betaetigen des Neuer Auftrag-Buttons
@@ -315,19 +369,19 @@ public class Controller implements IController {
             int exit = view.GetExitSelection();
                        
             if (store != 0 && exit != 0) {
-                int id = order_ID++;
-                logger.info("Es wurde das Lager "+store +" und der Ausgang"+ exit+" ausgew‰hlt!");
-                Order new_order = new Order(id, store, exit);
-
-                if (bots.size() > 0) {
-                    if (counter >= bots.size()) {
-                        counter = 0;
-                    }
-                    bots.get(counter).NewOrder(new_order);
-                    counter++;
-                } else {
-                    view.InputDialog("Keine Bots vorhanden");
-                }
+//                int id = order_ID++;
+//                logger.info("Es wurde das Lager "+store +" und der Ausgang"+ exit+" ausgew‰hlt!");
+//                Order new_order = new Order(id, store, exit);
+//
+//                if (bots.size() > 0) {
+//                    if (counter >= bots.size()) {
+//                        counter = 0;
+//                    }
+//                    bots.get(counter).NewOrder(new_order);
+//                    counter++;
+//                } else {
+//                    view.InputDialog("Keine Bots vorhanden");
+//                }
             } else {
             	logger.info("Es wurde kein Lager und/oder Ausgang  ausgew‰hlt!");
             }
@@ -340,6 +394,7 @@ public class Controller implements IController {
     class StoppListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
         	logger.info("Der Button 'Stop' wurde betaetigt");
+        	InputConsole("STOP");
             
         }
     }
@@ -350,6 +405,10 @@ public class Controller implements IController {
     class SimulationStartListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
         	logger.info("Der Menueeintrag Simulation -> Start wurde betaetigt");
+        	
+        	Simulator s = new Simulator(controller);
+        	s.CreatSimulateData();
+        	s.StartSimulat();
         }
     }
 

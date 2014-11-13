@@ -38,4 +38,9 @@ public interface IController {
     abstract Checkpoint NextFreePuffer();
     abstract boolean CheckpointReserved(String entrance);
     abstract void SetOnWaitList(String check, Bot bot);
+    
+    abstract public void OrderLoad(Order order);
+    abstract public  void OrderUnload(Order order, Bot bot);
+    
+    
 }

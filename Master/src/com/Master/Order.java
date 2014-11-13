@@ -9,19 +9,19 @@ public class Order {
     /**
      * ID der Order
      */
-    private int id;
+    private String id;
 
     /**
      * Lager wo die Lieferung abgeholt werden soll
      */
-    private int store_place;
+    private String store_place;
 
     /**
      * Ziel wo die Lieferung abgeliefert werden soll
      */
-    private int exit_place;
+    private String exit_place;
 
-    Order(int id, int store, int exit) {
+    Order(String id, String store, String exit) {
         this.id = id;
         this.exit_place = exit;
         this.store_place = store;
@@ -32,7 +32,7 @@ public class Order {
      *
      * @return ID der Order
      */
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -41,7 +41,7 @@ public class Order {
      *
      * @param id
      */
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -50,7 +50,7 @@ public class Order {
      *
      * @return Lager
      */
-    public int getStore_place() {
+    public String getStore_place() {
         return store_place;
     }
 
@@ -59,7 +59,7 @@ public class Order {
      *
      * @param store_place
      */
-    public void setStore_place(int store_place) {
+    public void setStore_place(String store_place) {
         this.store_place = store_place;
     }
 
@@ -68,7 +68,7 @@ public class Order {
      *
      * @return Ziel
      */
-    public int getExit_place() {
+    public String getExit_place() {
         return exit_place;
     }
 
@@ -77,7 +77,7 @@ public class Order {
      *
      * @param exit_place
      */
-    public void setExit_place(int exit_place) {
+    public void setExit_place(String exit_place) {
         this.exit_place = exit_place;
     }
 

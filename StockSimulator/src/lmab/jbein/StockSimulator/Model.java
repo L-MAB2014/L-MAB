@@ -27,11 +27,20 @@ public class Model {
 		for(int i=0; i<packages; i++) {
 			int tmp = (int) (Math.random() * 3);
 			if(tmp == 0) 
-				mStockA.addBack(getNextPackage());
+				{
+					mStockA.addBack(getNextPackage());
+					mStockA.addBack("T-"+(int) (Math.random() * 40));
+				}
 			else if(tmp == 1) 
-				mStockB.addBack(getNextPackage());
+				{
+					mStockB.addBack(getNextPackage());
+					mStockB.addBack("T-"+(int) (Math.random() * 40));
+				}
 			else
-				mStockC.addBack(getNextPackage());
+				{
+					mStockC.addBack(getNextPackage());
+					mStockC.addBack("T-"+(int) (Math.random() * 40));
+				}
 		}
 	}
 	

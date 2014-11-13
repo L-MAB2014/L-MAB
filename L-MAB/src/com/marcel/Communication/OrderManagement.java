@@ -8,9 +8,9 @@ public class OrderManagement extends ArrayList<Order> {
 
 
     public void addOrder(List<Message> message) {
-        int id = Integer.parseInt(message.get(0).getValue());
-        int store = Integer.parseInt(message.get(1).getValue());
-        int exit = Integer.parseInt(message.get(2).getValue());
+        String id = message.get(0).getValue();
+        String  store = message.get(1).getValue();
+        String  exit = message.get(2).getValue();
         this.add(new Order(id, store, exit));
     }
 
