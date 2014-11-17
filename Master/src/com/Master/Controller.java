@@ -31,6 +31,8 @@ public class Controller implements IController, IStockInput {
      * Speichert sich selbst als Objekt ab
      */
     private Controller controller;
+    
+    private Simulator simulator;
 
     /**
      * Enthüllt alle Checkpoints des Lagers
@@ -78,7 +80,7 @@ public class Controller implements IController, IStockInput {
         this.stocks.put("PU1", new Stock(this.checkpoints.get("PU1")));
         this.stocks.put("PU2", new Stock(this.checkpoints.get("PU2")));
         
-        
+        this.simulator = new Simulator(this);
     }
 
     public static void main(String[] args) {
@@ -267,13 +269,18 @@ public class Controller implements IController, IStockInput {
     	if (counter >= bots.size()) {
 		    counter = 0;
 		}
-		
-    	Bot bot = this.bots.get(counter);
-    	counter++;
-    	bot.NewOrder(order);
+		    	
+    	Bot bot = null;
+    	if(bots.size() > 0 )
+    	{
+    		bot = this.bots.get(counter);
+    		counter++;
+	    	bot.NewOrder(order);
+    	}
     	
     	Stock s = stocks.get(stock);
     	s.addOrder(order);
+    	
     	view.InputStoreTable(s.getName(), id, target, bot != null ? bot.getBt_Name():"-");
     	
     	
@@ -406,9 +413,8 @@ public class Controller implements IController, IStockInput {
         public void actionPerformed(ActionEvent e) {
         	logger.info("Der Menueeintrag Simulation -> Start wurde betaetigt");
         	
-        	Simulator s = new Simulator(controller);
-        	s.CreatSimulateData();
-        	s.StartSimulat();
+        	simulator.CreatSimulateData();
+        	simulator.StartSimulat();
         }
     }
 

@@ -17,7 +17,7 @@ public class Roboter implements IRoboter {
     float error;
     float turn;
     
-    float kp = 10;
+    float kp = 12;
     private CheckpointList map;
     private Checkpoint park_Position;
     private Checkpoint position;
@@ -245,6 +245,18 @@ public class Roboter implements IRoboter {
                 b = false;
 
         }
+        
+        LCD.drawString("FERTIG RUNDE ", 0, 0);
+        this.leftMotor.stop(true);
+        this.rightMotor.stop(true);
+        
+        
+        try {
+			Thread.sleep(20000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         if (manager.size() == 0) {
             this.Parking();
@@ -291,7 +303,7 @@ public class Roboter implements IRoboter {
 
         this.position = position.getNext_WayCheckpoint();
 
-        this.links90();
+        this.links45();
         this.IsParking = false;
     }
 
@@ -530,7 +542,7 @@ public class Roboter implements IRoboter {
 
         rightMotor.setSpeed(200);
         leftMotor.setSpeed(200);
-        rightMotor.rotate(220);
+        rightMotor.rotate(360);
     }
 
     void turn180() {
@@ -543,7 +555,7 @@ public class Roboter implements IRoboter {
         leftMotor.backward();
         rightMotor.forward();
 
-        Delay.msDelay(2000);
+        Delay.msDelay(2300);
 
 
     }
