@@ -198,10 +198,10 @@ public class Roboter implements IRoboter {
 
         Checkpoint nextCheckWay = position.getNext_WayCheckpoint();
         Checkpoint nextCheckOther = position.getNext_OtherCheckpoint();
+        
+        boolean roundEnd = false;
 
-        boolean b = true;
-
-        while (nextCheckOther == null || nextCheckOther != this.park_Position || b) {
+        while (!roundEnd) {
             
 		  if(this.IsOnPuffer() && !this.licence_exit){			  
 			  this.PufferModus(nextCheckOther, check_exit);
@@ -241,22 +241,16 @@ public class Roboter implements IRoboter {
             nextCheckWay = position.getNext_WayCheckpoint();
             nextCheckOther = position.getNext_OtherCheckpoint();
 
-            if (b)
-                b = false;
+            if (nextCheckOther != null && nextCheckOther == this.park_Position) {
+                roundEnd = true;
+            }
 
         }
         
-        LCD.drawString("FERTIG RUNDE ", 0, 0);
-        this.leftMotor.stop(true);
-        this.rightMotor.stop(true);
+       
         
         
-        try {
-			Thread.sleep(20000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+     
 
         if (manager.size() == 0) {
             this.Parking();
@@ -511,7 +505,7 @@ public class Roboter implements IRoboter {
 
 	        this.links90();   
 	        this.toPuffer = false;
-	        this.park_Position = null;
+	        this.puffer_position = null;
     	}
     	    	
     }
