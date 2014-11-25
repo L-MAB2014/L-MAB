@@ -320,10 +320,10 @@ public class View extends JFrame {
     		if (deletetable.getValueAt(i, 0).toString().equals(id)) {
     			
     			
-    			deletetable.setValueAt("####", i, 0);
+    		//	deletetable.setValueAt("####", i, 0);
     			
     		    DefaultTableModel model = (DefaultTableModel)deletetable.getModel();
-    			model.removeRow(0);
+    			model.removeRow(i);
     			return;
             }
     	}
@@ -463,154 +463,154 @@ public class View extends JFrame {
         this.checkmap = new HashMap<String, JLabel>();
 
         JLabel lblCp4 = new JLabel("");
-        lblCp4.setBounds(161, 127, 46, 14);
+        lblCp4.setBounds(161, 127, 70, 14);
         getContentPane().add(lblCp4);
         checkmap.put("CP4", lblCp4);
 
         JLabel lblCp3 = new JLabel("");
-        lblCp3.setBounds(161, 189, 46, 14);
+        lblCp3.setBounds(161, 189, 70, 14);
         getContentPane().add(lblCp3);
         checkmap.put("CP3", lblCp3);
 
         JLabel lblCp2 = new JLabel("");
-        lblCp2.setBounds(161, 248, 46, 14);
+        lblCp2.setBounds(161, 248, 70, 14);
         getContentPane().add(lblCp2);
         checkmap.put("CP2", lblCp2);
 
         JLabel lblCp1 = new JLabel("");
-        lblCp1.setBounds(161, 310, 46, 14);
+        lblCp1.setBounds(161, 310, 73, 14);
         getContentPane().add(lblCp1);
         checkmap.put("CP1", lblCp1);
 
         //--------------------------------------------------
         JLabel lblp4 = new JLabel("");
-        lblp4.setBounds(61, 111, 46, 14);
+        lblp4.setBounds(61, 111, 70, 14);
         getContentPane().add(lblp4);
         checkmap.put("P4", lblp4);
 
         JLabel lblp3 = new JLabel("");
-        lblp3.setBounds(61, 168, 46, 14);
+        lblp3.setBounds(61, 168, 60, 14);
         getContentPane().add(lblp3);
         checkmap.put("P3", lblp3);
 
         JLabel lblp2 = new JLabel("");
-        lblp2.setBounds(61, 229, 46, 14);
+        lblp2.setBounds(61, 229, 60, 14);
         getContentPane().add(lblp2);
         checkmap.put("P2", lblp2);
 
         JLabel lblp1 = new JLabel("");
-        lblp1.setBounds(61, 290, 46, 14);
+        lblp1.setBounds(61, 290, 70, 14);
         getContentPane().add(lblp1);
         checkmap.put("P1", lblp1);
 
         //-----------------------------------------------
         JLabel lbls6 = new JLabel("");
-        lbls6.setBounds(561, 113, 46, 14);
+        lbls6.setBounds(537, 113, 70, 14);
         getContentPane().add(lbls6);
         checkmap.put("S6", lbls6);
 
         JLabel lbls5 = new JLabel("");
-        lbls5.setBounds(493, 113, 46, 14);
+        lbls5.setBounds(473, 113, 66, 14);
         getContentPane().add(lbls5);
         checkmap.put("S5", lbls5);
 
         JLabel lbls4 = new JLabel("");
-        lbls4.setBounds(409, 113, 46, 14);
+        lbls4.setBounds(385, 113, 70, 14);
         getContentPane().add(lbls4);
         checkmap.put("S4", lbls4);
 
         JLabel lbls3 = new JLabel("");
-        lbls3.setBounds(341, 113, 46, 14);
+        lbls3.setBounds(327, 113, 60, 14);
         getContentPane().add(lbls3);
         checkmap.put("S3", lbls3);
 
         JLabel lbls2 = new JLabel("");
-        lbls2.setBounds(257, 113, 46, 14);
+        lbls2.setBounds(246, 113, 57, 14);
         getContentPane().add(lbls2);
         checkmap.put("S2", lbls2);
 
         JLabel lbls1 = new JLabel("");
-        lbls1.setBounds(190, 113, 46, 14);
+        lbls1.setBounds(176, 113, 60, 14);
         getContentPane().add(lbls1);
         checkmap.put("S1", lbls1);
 
         //---------------------------------------------
         JLabel lblpl3 = new JLabel("");
-        lblpl3.setBounds(550, 18, 46, 14);
+        lblpl3.setBounds(550, 18, 70, 14);
         getContentPane().add(lblpl3);
         checkmap.put("PL3", lblpl3);
 
         JLabel lblpl2 = new JLabel("");
-        lblpl2.setBounds(396, 18, 46, 14);
+        lblpl2.setBounds(396, 18, 70, 14);
         getContentPane().add(lblpl2);
         checkmap.put("PL2", lblpl2);
 
         JLabel lblpl1 = new JLabel("");
-        lblpl1.setBounds(250, 18, 46, 14);
+        lblpl1.setBounds(250, 18, 73, 14);
         getContentPane().add(lblpl1);
         checkmap.put("PL1", lblpl1);
 
         //---------------------------------------------
         JLabel lblc3 = new JLabel("");
-        lblc3.setBounds(561, 272, 46, 14);
+        lblc3.setBounds(537, 272, 70, 14);
         getContentPane().add(lblc3);
         checkmap.put("C3", lblc3);
 
         JLabel lblc2 = new JLabel("");
-        lblc2.setBounds(561, 214, 46, 14);
+        lblc2.setBounds(537, 214, 70, 14);
         getContentPane().add(lblc2);
         checkmap.put("C2", lblc2);
 
         JLabel lblc1 = new JLabel("");
-        lblc1.setBounds(561, 151, 46, 14);
+        lblc1.setBounds(534, 151, 73, 14);
         getContentPane().add(lblc1);
         checkmap.put("C1", lblc1);
 
         //---------------------------------------------
         JLabel lblpf3 = new JLabel("");
-        lblpf3.setBounds(680, 260, 46, 14);
+        lblpf3.setBounds(656, 260, 70, 14);
         getContentPane().add(lblpf3);
         checkmap.put("PF3", lblpf3);
 
         JLabel lblpf2 = new JLabel("");
-        lblpf2.setBounds(680, 196, 46, 14);
+        lblpf2.setBounds(656, 196, 70, 14);
         getContentPane().add(lblpf2);
         checkmap.put("PF2", lblpf2);
 
         JLabel lblpf1 = new JLabel("");
-        lblpf1.setBounds(680, 133, 46, 14);
+        lblpf1.setBounds(656, 133, 70, 14);
         getContentPane().add(lblpf1);
         checkmap.put("PF1", lblpf1);
 
         //---------------------------------
         JLabel lble4 = new JLabel("");
-        lble4.setBounds(245, 322, 46, 14);
+        lble4.setBounds(221, 322, 70, 14);
         getContentPane().add(lble4);
         checkmap.put("E4", lble4);
 
         JLabel lble3 = new JLabel("");
-        lble3.setBounds(310, 322, 46, 14);
+        lble3.setBounds(300, 322, 70, 14);
         getContentPane().add(lble3);
         checkmap.put("E3", lble3);
 
         JLabel lble2 = new JLabel("");
-        lble2.setBounds(435, 322, 46, 14);
+        lble2.setBounds(424, 322, 70, 14);
         getContentPane().add(lble2);
         checkmap.put("E2", lble2);
 
         JLabel lble1 = new JLabel("");
-        lble1.setBounds(505, 322, 46, 14);
+        lble1.setBounds(505, 322, 66, 14);
         getContentPane().add(lble1);
         checkmap.put("E1", lble1);
 
         //----------------------------------
         JLabel lblpu2 = new JLabel("");
-        lblpu2.setBounds(296, 403, 46, 14);
+        lblpu2.setBounds(296, 403, 68, 14);
         getContentPane().add(lblpu2);
         checkmap.put("PU2", lblpu2);
 
         JLabel lblpu1 = new JLabel("");
-        lblpu1.setBounds(491, 403, 46, 14);
+        lblpu1.setBounds(491, 403, 70, 14);
         getContentPane().add(lblpu1);
         checkmap.put("PU1", lblpu1);
     }

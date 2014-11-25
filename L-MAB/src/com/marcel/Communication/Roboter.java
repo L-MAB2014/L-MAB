@@ -192,9 +192,6 @@ public class Roboter implements IRoboter {
 
        this.Start_Modus(check_store);
         
-//        if (this.IsParking) {
-//            this.Unparking();
-//        }
 
         Checkpoint nextCheckWay = position.getNext_WayCheckpoint();
         Checkpoint nextCheckOther = position.getNext_OtherCheckpoint();
@@ -226,13 +223,16 @@ public class Roboter implements IRoboter {
 
             }
 
-            this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
+            
+		  if (left_curve) {
+              left_curve = false;
+              this.links45();
+          }
+		  
+		  	this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
                     new Message(RoboterData.code_NextCheckpoint, nextCheckWay.getName()));                       
 
-            if (left_curve) {
-                left_curve = false;
-                this.links45();
-            }
+           
 
             this.fahreZu(this.position.getNext_WayCheckpoint().getColor());
 
@@ -244,13 +244,9 @@ public class Roboter implements IRoboter {
             if (nextCheckOther != null && nextCheckOther == this.park_Position) {
                 roundEnd = true;
             }
+                       
 
         }
-        
-       
-        
-        
-     
 
         if (manager.size() == 0) {
             this.Parking();
@@ -265,10 +261,12 @@ public class Roboter implements IRoboter {
     private void Parking() {
         LCD.drawString("PARKEN!! ", 0, 2);
 
+        this.links90();
+        
         this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
                 new Message(RoboterData.code_NextCheckpoint, this.park_Position.getName()));
 
-        this.links90();
+        
         this.fahreZu(this.park_Position.getColor());
         this.turn180();
 
@@ -386,10 +384,11 @@ public class Roboter implements IRoboter {
 
     private void EntranceModus(Checkpoint entrance, Checkpoint exit, String order_id, boolean status) {
         try {
-            this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
-                    new Message(RoboterData.code_NextCheckpoint, entrance.getName()));
-
-            this.links90();
+            
+        	this.links90();
+        	
+        	this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
+                    new Message(RoboterData.code_NextCheckpoint, entrance.getName()));            
 
             this.fahreZu(entrance.getColor());
 
