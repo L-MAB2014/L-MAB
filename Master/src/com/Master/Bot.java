@@ -307,8 +307,8 @@ public class Bot implements IBot {
                 if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_Puffer) && m3.getKey().equals(MasterData.code_TestTarget)) {
                     
                 	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach dem Ausgang  "+m3.getValue()+" will" );
-                	if (controller.TestEntranceForPuffer(m3.getValue())) { // Prüfen ob Lager belegt ist
-                        if (controller.CheckpointReserved(m3.getValue())) { // Lager Reservieren!
+                	if (controller.TestEntranceForPuffer(m3.getValue(), this)) { // Prüfen ob Lager belegt ist
+                        if (controller.CheckpointReserved(m3.getValue(),this)) { // Lager Reservieren!
                         	
                         	List<Message> list = new ArrayList<Message>();
                         	list.add((new Message(MasterData.code_Continue, m1.getValue())));
@@ -329,7 +329,7 @@ public class Bot implements IBot {
                     	list.add((new Message(MasterData.code_Continue, m1.getValue())));
                     	list.add((new Message(MasterData.code_Puffer, p.getName())));
                     	
-                    	this.controller.CheckpointReserved(p.getName());
+                    	this.controller.CheckpointReserved(p.getName(), this);
                     	this.puffer_modus = true;
                     	this.puffer_reserved = true;
                     	this.puffer = p.getName();
@@ -349,8 +349,8 @@ public class Bot implements IBot {
                 	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach dem Eingang  "+m3.getValue()+" will" );
                 	List<Message> list = new ArrayList<Message>();
                 	
-                	if (controller.TestEntranceForPuffer(m3.getValue())) { // Prüfen ob Lager belegt ist
-                        if (controller.CheckpointReserved(m3.getValue())) { // Lager Reservieren!
+                	if (controller.TestEntranceForPuffer(m3.getValue(), this)) { // Prüfen ob Lager belegt ist
+                        if (controller.CheckpointReserved(m3.getValue(), this)) { // Lager Reservieren!
                         	
                         	
                         	list.add((new Message(MasterData.code_Continue, m1.getValue())));

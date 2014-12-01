@@ -34,9 +34,9 @@ public interface IController {
      */
     abstract boolean CheckForContinue(String checkpoint, String next_checkpoint, Bot bot);
 
-    abstract boolean TestEntranceForPuffer(String entrance);
+    abstract boolean TestEntranceForPuffer(String entrance, Bot bot);
     abstract Checkpoint NextFreePuffer();
-    abstract boolean CheckpointReserved(String entrance);
+    abstract boolean CheckpointReserved(String entrance, Bot bot);
     abstract void SetOnWaitList(String check, Bot bot);
     
     abstract public void OrderLoad(Order order);

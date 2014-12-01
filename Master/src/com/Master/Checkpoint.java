@@ -2,6 +2,7 @@ package com.Master;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  *
@@ -9,6 +10,11 @@ import java.util.List;
  */
 public class Checkpoint {
 
+	/**
+	 * logger
+	 */
+	private static Logger logger = Logger.getAnonymousLogger();
+	
     /**
      * Name des Checkpunktes
      */
@@ -35,14 +41,14 @@ public class Checkpoint {
     private Checkpoint previous_OtherCheckpoint;
 
     /**
-     * Gibt an ob der Checkpoint reserviert ist
+     * Beinhaltet den Bot der den Checkpoint reserviert 
      */
-    private boolean isReserved;
+    private Bot reserved;
 
     /**
-     * Gibt an ob der Checkpoint belegt/gesperrt ist
+     * Beinhaltet den Bot der den Checkpoint belegt/sperrt 
      */
-    private boolean isClosed;
+    private Bot closed;
 
     /**
      * Warteliste für den Checkpoint
@@ -54,8 +60,8 @@ public class Checkpoint {
 
         this.waiting_List = new ArrayList<Bot>();
 
-        this.isClosed = false;
-        this.isReserved = false;
+        this.closed = null;
+        this.reserved = null;
 
         this.next_WayCheckpoint = null;
         this.next_OtherCheckpoint = null;
@@ -91,7 +97,10 @@ public class Checkpoint {
      * @return
      */
     public boolean isReserved() {
-        return isReserved;
+    	logger.info(" Abfrage- Reservierung Checkpoint "+ this.name+ " : ="+ 
+    			(this.reserved == null ? "NULL" : this.reserved.getBt_Name()));
+    	
+        return this.reserved != null;
     }
 
     /**
@@ -99,9 +108,11 @@ public class Checkpoint {
      *
      * @param isReserved
      */
-    public void setReserved(boolean isReserved) {
-        System.out.println(name + " (Reserviert)  : " + isReserved);
-        this.isReserved = isReserved;
+    public void setReservedBot(Bot bot) {
+    	logger.info("Checkpoint "+ this.name+ " : Reservierung (ALT)="+ 
+    			(this.reserved == null ? "NULL" : this.reserved.getBt_Name())  +" ## Reservierung (NEU)="
+    	+ (bot==null ? "NULL" : bot.getBt_Name()));
+        this.reserved = bot;
     }
 
     /**
@@ -110,7 +121,9 @@ public class Checkpoint {
      * @return
      */
     public boolean isClosed() {
-        return isClosed;
+    	logger.info(" Abfrage-Belegung Checkpoint "+ this.name+ " : ="+ 
+    			(this.closed == null ? "NULL" : this.closed.getBt_Name()));
+        return this.closed != null;
     }
 
     /**
@@ -118,9 +131,11 @@ public class Checkpoint {
      *
      * @param isClosed
      */
-    public void setClosed(boolean isClosed) {
-        System.out.println(name + "  : " + isClosed);
-        this.isClosed = isClosed;
+    public void setClosedBot(Bot bot) {
+    	logger.info("Checkpoint "+this.name+ " : Belegung (ALT)="+ 
+    			(this.closed == null ? "NULL":this.closed.getBt_Name())  +" ### Belegung (NEU)="
+    	+ (bot == null ? "NULL" :bot.getBt_Name()));
+        this.closed = bot;
     }
 
     /**
@@ -184,7 +199,7 @@ public class Checkpoint {
      * @return Ob der Bot in die Warteliste gesetzt wurde oder nciht
      */
     public boolean setBotOnWaitList(Bot bot) {
-        if (this.isBotInWaitList() || this.isClosed || this.isReserved()) {
+        if (this.isBotInWaitList() || this.isClosed() || this.isReserved()) {
             this.waiting_List.add(bot);
             return true;
         }
@@ -199,5 +214,16 @@ public class Checkpoint {
      */
     public boolean isBotInWaitList() {
         return this.waiting_List.size() == 0 ? false : true;
+    }
+    
+    public boolean BotHaveClosesOrReserved(Bot bot)
+     {
+        if(this.closed != null && this.closed == bot)
+        	return true;
+        
+        if(this.reserved != null && this.reserved == bot)
+        	return true;
+        
+    	return false;
     }
 }
