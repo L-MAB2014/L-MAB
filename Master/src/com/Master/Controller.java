@@ -206,6 +206,7 @@ public class Controller implements IController, IStockInput {
                
             	if (!next_checkpoint.isBotInWaitList() && !next_checkpoint.isClosed()) {
                     checkpoint.setClosedBot(null);   
+                    checkpoint.setReservedBot(null);
                     logger.info("Checkpoint "+ next_checkpoint.getName()+ " wird enstperrt (Bot: "+bot.getBt_Name()+")");
                     next_checkpoint.setClosedBot(bot);
                     logger.info("Bot "+ bot.getBt_Name() +" sperrt den  Checkpoint "+ next_checkpoint.getName());
@@ -474,6 +475,7 @@ public class Controller implements IController, IStockInput {
                 	if(check.isBotInWaitList())
                 	{
 	                    check.setClosedBot(null);
+	                    check.setReservedBot(null);
 	                    
 	                    view.UpdateClosedpoint(check.getName(), false);
 	                    waitBot = check.getFirstOnWaitList();

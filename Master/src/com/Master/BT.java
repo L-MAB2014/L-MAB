@@ -153,10 +153,12 @@ public class BT {
      * @param message Zu sendene Nachricht
      * @return Ob die Sendung erfolgreich verschickt wurde oder nicht
      */
-    public boolean SendMessage(String message) {
+    public synchronized boolean SendMessage(String message) {
         try {
-        	logger.info("Bot "+bt_Name+"  bekommt folgende Nachrcht gesendet: "+message);
-            dos.write(message.getBytes());
+        	logger.info("Bot "+bt_Name+"  bekommt folgende Nachricht gesendet: "+message);
+        	controller.InputConsole("Bot "+bt_Name+"  bekommt folgende Nachricht gesendet: "+message);
+           
+        	dos.write(message.getBytes());
             dos.flush();
 
             return true;

@@ -84,7 +84,9 @@ public class Bot implements IBot {
      */
     private List<Message> m_waitList;
     
-
+    
+    private List<Message> m_waitListCheckpoint;
+    
     /**
      * ID des Bots
      */
@@ -107,6 +109,7 @@ public class Bot implements IBot {
         this.order_management = new OrderManagement();
         
         this.m_waitList = new ArrayList<Message>();
+        this.m_waitListCheckpoint = new ArrayList<Message>();
         
         this.status = "Nicht Verbunden";
         this.target = "-";
@@ -217,7 +220,7 @@ public class Bot implements IBot {
         	logger.info("Bot "+bt_Name+" bekommt  Checkpunkt "+next_checkpoint+" nicht freigegeben");
             controller.InputConsole((this.bt_Name + ": Checkpoint:" + this.next_checkpoint + " nicht Freigeben"));
             this.inWaitList = true;
-            this.m_waitList.add(new Message(MasterData.code_Continue, this.next_checkpoint));
+            this.m_waitListCheckpoint.add(new Message(MasterData.code_Continue, this.next_checkpoint));
         }
     }
 
@@ -231,11 +234,11 @@ public class Bot implements IBot {
         if (this.inWaitList && this.m_waitList != null) {
         	logger.info("Bot "+bt_Name+" wird aus der Warteschlange geholt und bekommt die genehmigung für Checkpunkt "+next_checkpoint);
             controller.InputConsole((this.bt_Name + ": Checkpoint:" + this.next_checkpoint + " Freigeben"));
-            bt.SendMessage(Protokoll.MessageToString(this.m_waitList));
+            bt.SendMessage(Protokoll.MessageToString(this.m_waitListCheckpoint));
 
 
             this.inWaitList = false;
-            this.m_waitList.clear();
+            this.m_waitListCheckpoint.clear();
 
             return true;
         } else if (this.puffer_modus) {

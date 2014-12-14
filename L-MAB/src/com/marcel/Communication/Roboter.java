@@ -502,7 +502,7 @@ public class Roboter implements IRoboter {
 	        
 	        this.fahreZu(position.getColor());
 
-	        this.links90();   
+	//        this.links90();   
 	        this.toPuffer = false;
 	        this.puffer_position = null;
     	}
