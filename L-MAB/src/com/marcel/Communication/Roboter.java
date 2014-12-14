@@ -571,7 +571,11 @@ public class Roboter implements IRoboter {
 
             } else if (list.get(0).getKey().equals(RoboterData.code_ParkPosition)) {
                 this.SetParkPosition(list.get(0));            
+            }else if (list.get(0).getKey().equals(RoboterData.code_STOP)) {
+            	if(list.get(0).getValue().equals(RoboterData.STOP_CODE))
+            		System.exit(0);
             }
+            	
             
         } else if (list.size() == 2) {
         	Message m1 = list.get(0);

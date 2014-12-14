@@ -8,14 +8,15 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.apache.log4j.*;
 
 public class Controller implements IController, IStockInput {
 
 	/**
 	 * logger
 	 */
-	private static Logger logger = Logger.getAnonymousLogger();
+	private static org.apache.log4j.Logger logger = LogManager.getLogger("Controller");
 	
     /**
      * Benutzeroberfläche
@@ -308,6 +309,22 @@ public class Controller implements IController, IStockInput {
 		}
     }
     
+    public void Stop()
+    {
+    	try{
+    		for(int i =0; i < this.bots.size();++i)
+    		{
+    			this.bots.get(i).Stop();
+    		}
+    		
+    	}catch(Exception e)
+    	{
+    		logger.info("Stopp : "+e);
+    	}
+    }
+    
+    
+    
     
     
 //    /**
@@ -403,8 +420,8 @@ public class Controller implements IController, IStockInput {
     class StoppListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
         	logger.info("Der Button 'Stop' wurde betaetigt");
-        	InputConsole("STOP");
-            
+        	
+        	Stop();            
         }
     }
 

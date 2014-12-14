@@ -16,7 +16,8 @@ public class RoboterData {
     public static final String code_PostionLoad = "PL";
     public static final String code_PostionUnload = "PU";
 
-    public static final String code_STOPP = "ST";
+    public static final String code_STOP = "ST";
+    public static final String STOP_CODE = "X123x";
     public static final String code_Store = "S";
     public static final String code_Exit = "E";
     public static final String code_CenterPuffer = "C";

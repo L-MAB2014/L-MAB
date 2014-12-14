@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.log4j.LogManager;
+
 public class Bot implements IBot {
 
 	/**
 	 * logger
 	 */
-	private static Logger logger = Logger.getAnonymousLogger();
+	private static org.apache.log4j.Logger logger = LogManager.getLogger("Controller");
 	
 	/**
      * Controller für Informationen
@@ -383,6 +385,10 @@ public class Bot implements IBot {
         }
     }
     
+    public void Stop()
+    {
+    	this.bt.CloseAgent();
+    }
     
     public void Parking()
     {

@@ -33,7 +33,10 @@ public class MasterData {
     /**
      * Code für ein Stopp/Signal
      */
-    public static final String code_STOPP = "ST";
+    public static final String code_STOP = "ST";
+    
+
+    public static final String STOP_CODE = "X123x";
 
     /**
      * Code für einen Store(Lager)

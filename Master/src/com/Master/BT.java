@@ -5,14 +5,16 @@ import lejos.pc.comm.NXTConnector;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.util.logging.Logger;
+import java.util.*;
+
+import org.apache.log4j.LogManager;
 
 public class BT {
 
 	/**
 	 * logger
 	 */
-	private static Logger logger = Logger.getAnonymousLogger();
+	private static org.apache.log4j.Logger logger = LogManager.getLogger("Controller");
     /**
      * Dateneingangsstream
      */
@@ -49,11 +51,18 @@ public class BT {
      */
     private IBot bot;
 
-
+    private List<String> send_messages;
+    
+    private List<String> input_messages;
+    
     BT(String bt_Name, IController controller, IBot bot) {
         this.bot = bot;
         this.bt_Name = bt_Name;
         this.controller = controller;
+        
+        this.send_messages = new ArrayList<String>();
+        this.input_messages = new ArrayList<String>();
+        
         this.input = new InputChannel();
         this.connect = false;
     }
@@ -158,6 +167,8 @@ public class BT {
         	logger.info("Bot "+bt_Name+"  bekommt folgende Nachricht gesendet: "+message);
         	controller.InputConsole("Bot "+bt_Name+"  bekommt folgende Nachricht gesendet: "+message);
            
+        	this.send_messages.add(message);
+        	
         	dos.write(message.getBytes());
             dos.flush();
 
@@ -165,7 +176,7 @@ public class BT {
 
         } catch (Exception e) {
 
-        	logger.info("Bot "+bt_Name+"-(MessageFromBot()):"+e);
+        	logger.error("Bot "+bt_Name+"-(MessageFromBot()):"+e);
             return false;
         }
     }
@@ -174,8 +185,9 @@ public class BT {
      * Holt die Nachrichten aus dem Eingangs-Stream
      *
      * @return Empfangende Nachricht
+     * @throws Exception 
      */
-    public String MessageFromBot() {
+    public String MessageFromBot() throws Exception {
         try {
             String message = "";
             char c = (char) this.dis.readByte();
@@ -188,8 +200,8 @@ public class BT {
 
         } catch (Exception e) {
         	
-        	logger.info("Bot "+bt_Name+"-(MessageFromBot()):"+e);
-            return null;
+        	logger.error("Bot "+bt_Name+"-(MessageFromBot()):"+e);
+        	throw(e);
         }
     }
 
@@ -216,13 +228,14 @@ public class BT {
             try {
             	logger.info("Der Input Channel für Bot "+bt_Name+" wurde gestartet");
                 while (connect) {
-                    String message = MessageFromBot();
+                    String message = MessageFromBot();                    
+                    input_messages.add(message);
                     bot.HandleMessageInput(message);
                 }
 
             } catch (Exception e) {
 
-            	logger.info("Bot "+bt_Name+"-(InputChannel-run()):"+e);
+            	logger.error("Bot "+bt_Name+"-(InputChannel-run()):"+e);
             }
             logger.info("Der Input Channel für Bot "+bt_Name+" wurde beendet");
             controller.InputConsole(bt_Name + ": Input-Cahnnel beendet");
