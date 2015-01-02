@@ -1,0 +1,5 @@
+2014-12-30 23:57:20,446 INFO  [main] Controller: Mastrer(Controller) wird gestartet!
+2014-12-30 23:57:20,903 INFO  [main] Controller: Oberflaeche wird geöffnet und und die Actionlistener gesetzt
+2014-12-30 23:57:20,908 INFO  [main] Controller: Checkpoints (Map) werden Initialisiert
+2014-12-30 23:57:23,868 INFO  [AWT-EventQueue-0] Controller: Der Button 'Stop' wurde betaetigt
+2014-12-30 23:57:24,369 INFO  [AWT-EventQueue-0] Controller: Der Button 'Stop' wurde betaetigt

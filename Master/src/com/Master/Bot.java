@@ -11,7 +11,7 @@ public class Bot implements IBot {
 	/**
 	 * logger
 	 */
-	private static org.apache.log4j.Logger logger = LogManager.getLogger("Controller");
+	private static org.apache.log4j.Logger logger = LogManager.getLogger("Bot");
 	
 	/**
      * Controller für Informationen
@@ -255,6 +255,9 @@ public class Bot implements IBot {
         	this.puffer = "-";
         	this.m_waitList.clear();
             return true;
+        }else
+        {
+        	logger.error("Bot "+bt_Name+" wurde aus der Warteschleife geholt obwohl sich dier nicht in einer befidnet ");
         }
         return false;
     }
@@ -387,6 +390,7 @@ public class Bot implements IBot {
     
     public void Stop()
     {
+    	bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_STOP, MasterData.STOP_CODE))));
     	this.bt.CloseAgent();
     }
     

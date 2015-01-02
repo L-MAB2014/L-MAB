@@ -14,7 +14,7 @@ public class BT {
 	/**
 	 * logger
 	 */
-	private static org.apache.log4j.Logger logger = LogManager.getLogger("Controller");
+	private static org.apache.log4j.Logger logger = LogManager.getLogger("BT");
     /**
      * Dateneingangsstream
      */

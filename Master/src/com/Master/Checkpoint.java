@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.log4j.LogManager;
+
 /**
  *
  *
@@ -13,7 +15,7 @@ public class Checkpoint {
 	/**
 	 * logger
 	 */
-	private static Logger logger = Logger.getAnonymousLogger();
+	private static org.apache.log4j.Logger logger = LogManager.getLogger("Checkpoint");
 	
     /**
      * Name des Checkpunktes
@@ -54,9 +56,13 @@ public class Checkpoint {
      * Warteliste für den Checkpoint
      */
     private List<Bot> waiting_List;
+    
+    
+    private boolean isStoreOrExit;
 
-    Checkpoint(String name) {
+    Checkpoint(String name, boolean storeOrExit) {
         this.name = name;
+        this.isStoreOrExit = storeOrExit;
 
         this.waiting_List = new ArrayList<Bot>();
 
@@ -67,6 +73,11 @@ public class Checkpoint {
         this.next_OtherCheckpoint = null;
         this.previous_WayCheckpoint = null;
         this.previous_OtherCheckpoint = null;
+    }
+    
+    public boolean isStoreOrExit()
+    {
+    	return this.isStoreOrExit;
     }
 
     /**
@@ -96,7 +107,7 @@ public class Checkpoint {
      *
      * @return
      */
-    public boolean isReserved() {
+    public synchronized boolean isReserved() {
     	logger.info(" Abfrage- Reservierung Checkpoint "+ this.name+ " : ="+ 
     			(this.reserved == null ? "NULL" : this.reserved.getBt_Name()));
     	
@@ -108,7 +119,7 @@ public class Checkpoint {
      *
      * @param isReserved
      */
-    public void setReservedBot(Bot bot) {
+    public synchronized void setReservedBot(Bot bot) {
     	logger.info("Checkpoint "+ this.name+ " : Reservierung (ALT)="+ 
     			(this.reserved == null ? "NULL" : this.reserved.getBt_Name())  +" ## Reservierung (NEU)="
     	+ (bot==null ? "NULL" : bot.getBt_Name()));
@@ -189,7 +200,13 @@ public class Checkpoint {
      * @return Erster Bot der Warteliste
      */
     public Bot getFirstOnWaitList() {
-        return this.waiting_List.remove(0);
+    	
+        Bot bot = this.waiting_List.remove(0);
+        
+        logger.info("Checkpoint-Warteschlange ersten herausnehmen :"+ this.name+ "  "+ 
+    			bot.getBt_Name()  +" ## Warteschlangegesamt="+this.waiting_List.size());
+        
+        return bot;
     }
 
     /**
@@ -201,6 +218,9 @@ public class Checkpoint {
     public boolean setBotOnWaitList(Bot bot) {
         if (this.isBotInWaitList() || this.isClosed() || this.isReserved()) {
             this.waiting_List.add(bot);
+            logger.info("Checkpoint-Warteschlange NEU :"+ this.name+ "  "+ 
+        			bot.getBt_Name()  +" ## Warteschlangegesamt="+this.waiting_List.size());
+        
             return true;
         }
 

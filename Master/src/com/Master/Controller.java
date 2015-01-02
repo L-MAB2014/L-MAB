@@ -129,7 +129,7 @@ public class Controller implements IController, IStockInput {
     /* (non-Javadoc)
      * @see com.Master.IController#CheckForContinue(java.lang.String)
      */
-    public boolean CheckForContinue(String checkpoint, String next_checkpoint, Bot bot) {
+    public synchronized boolean CheckForContinue(String checkpoint, String next_checkpoint, Bot bot) {
         Checkpoint check = checkpoints.get(checkpoint);
 
         if (check != null) {
@@ -150,7 +150,7 @@ public class Controller implements IController, IStockInput {
         return false;
     }
 
-    public void SetOnWaitList(String check, Bot bot) {
+    public synchronized void SetOnWaitList(String check, Bot bot) {
     	
     	Checkpoint checkpoint = checkpoints.get(check);
     	
@@ -161,7 +161,7 @@ public class Controller implements IController, IStockInput {
     	}
     }
 
-    private boolean EditCheckpointsForContinue(Checkpoint checkpoint, Checkpoint next_checkpoint, Bot bot) {
+    private synchronized boolean EditCheckpointsForContinue(Checkpoint checkpoint, Checkpoint next_checkpoint, Bot bot) {
     	logger.info("Bot "+ bot.getBt_Name() +" prüft ob Checkpoint "+ next_checkpoint.getName()+"  gesperrt ist");
     	
     	if (!next_checkpoint.isClosed()) {
@@ -173,59 +173,56 @@ public class Controller implements IController, IStockInput {
         	if (checkpoint.isBotInWaitList()) {
             	logger.info("Bots in Warteschlange des Checkpunkts  "+ checkpoint.getName());
                 
-            	if (checkpoint.isReserved()) {
-                    checkpoint.setClosedBot(null);
-                    checkpoint.setReservedBot(null);
-                    this.view.UpdateClosedpoint(checkpoint.getName(), false);
-                    Bot waitBot = checkpoint.getFirstOnWaitList();
-                    
-                    if(!waitBot.IsinPuffer() && waitBot.HavePufferReserved())
-                    {
-                    	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
-                    	if(puffer != null)
-                    		puffer.setReservedBot(null);
-                    }
-                    checkpoint.setReservedBot(waitBot);
-                    waitBot.ContinueAfterWaitList();
-                    logger.info("Checkpunkts  "+ checkpoint.getName()+" für Bot "+waitBot.getBt_Name()+" freigeben");
-                    
-                } else {
+//            	if (checkpoint.isStoreOrExit()) {
+//            		
+//                    checkpoint.setClosedBot(null);
+//                    checkpoint.setReservedBot(null);
+//                    
+//                    this.view.UpdateClosedpoint(checkpoint.getName(), false);
+//                    Bot waitBot = checkpoint.getFirstOnWaitList();
+//                    
+//                    if(!waitBot.IsinPuffer())
+//                    {
+//                    	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
+//                    	if(puffer != null)
+//                    		puffer.setReservedBot(null);
+//                    }
+//                    
+//                    checkpoint.setReservedBot(waitBot);
+//                    logger.info("Bots "+waitBot.getBt_Name()+" wird aus der Warteschlange des Checkpunkts  "+ checkpoint.getName()+ "geholt!");
+//                    waitBot.ContinueAfterWaitList();
+//                    logger.info("Checkpunkts  "+ checkpoint.getName()+" für Bot "+waitBot.getBt_Name()+" freigeben");
+//                    
+//                } else {
+                	
                     WorkOffWaitList w = new WorkOffWaitList(checkpoint);
                     w.start();
-                }
+ //               }
             } else {
-            	logger.info("Checkpoint "+ next_checkpoint.getName()+ " wird enstperrt (Bot: "+bot.getBt_Name()+")");
-                checkpoint.setClosedBot(null);
+            	logger.info("Checkpoint "+ next_checkpoint.getName()+ " wird enstperrt (Keiner in der Warteschlange, letzter Bot: "+bot.getBt_Name()+")");
+                
+            	checkpoint.setClosedBot(null);
                 checkpoint.setReservedBot(null);
+                
                 this.view.UpdateClosedpoint(checkpoint.getName(), false);
             }
+    	
             return true;
             
         } else {
            
-        	if (!next_checkpoint.setBotOnWaitList(bot)) {
+        	if (next_checkpoint.setBotOnWaitList(bot)) {
                
-            	if (!next_checkpoint.isBotInWaitList() && !next_checkpoint.isClosed()) {
-                    checkpoint.setClosedBot(null);   
-                    checkpoint.setReservedBot(null);
-                    logger.info("Checkpoint "+ next_checkpoint.getName()+ " wird enstperrt (Bot: "+bot.getBt_Name()+")");
-                    next_checkpoint.setClosedBot(bot);
-                    logger.info("Bot "+ bot.getBt_Name() +" sperrt den  Checkpoint "+ next_checkpoint.getName());
-                    
-                    this.view.UpdateClosedpoint(checkpoint.getName(), false);
-                    this.view.UpdateClosedpoint(next_checkpoint.getName(), true);
-                    
-                    return true;
-                }
+        		logger.info("Bot "+ bot.getBt_Name() +" ist in der Warteschlange fuer den  Checkpoint "+ next_checkpoint.getName());
             } else {
-            	logger.info("Bot "+ bot.getBt_Name() +" ist in der Warteschlange fuer den  Checkpoint "+ next_checkpoint.getName());
+            	return EditCheckpointsForContinue(checkpoint, next_checkpoint, bot);
             }
         }
 
         return false;
     }
 
-    public Checkpoint NextFreePuffer() {
+    public synchronized Checkpoint NextFreePuffer() {
         Checkpoint puffer1 = checkpoints.get("PF1");
         Checkpoint puffer2 = checkpoints.get("PF2");
         Checkpoint puffer3 = checkpoints.get("PF3");
@@ -240,7 +237,7 @@ public class Controller implements IController, IStockInput {
         	return null;
     }
     
-    public boolean TestEntranceForPuffer(String entrance, Bot bot) {
+    public synchronized boolean TestEntranceForPuffer(String entrance, Bot bot) {
         Checkpoint check = checkpoints.get(entrance);
         if ((check.isClosed() || check.isReserved()) && !check.BotHaveClosesOrReserved(bot))
         {
@@ -253,7 +250,7 @@ public class Controller implements IController, IStockInput {
 
     }
 
-    public boolean CheckpointReserved(String entrance, Bot bot) {
+    public synchronized boolean CheckpointReserved(String entrance, Bot bot) {
         Checkpoint check = checkpoints.get(entrance);
 
         if (!check.isReserved() || check.BotHaveClosesOrReserved(bot) ) {       	
@@ -464,6 +461,65 @@ public class Controller implements IController, IStockInput {
         }
     }
 
+//    /**
+//     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung hÃ¤ndelt
+//     */
+//    private class WorkOffWaitList extends Thread {
+//        Checkpoint check;
+//        WorkOffWaitList(Checkpoint cp) {
+//            this.check = cp;
+//        }
+//
+//        /* (non-Javadoc)
+//         * @see java.lang.Thread#run()
+//         */
+//        public void run() {
+//        	logger.info("WorkOffWaitList  fuer den Checkpunkt "+check.getName()+" gestartet");
+//            boolean b = true;
+//            while (check.isBotInWaitList() && b) {
+//            	
+//                Bot waitBot = check.getFirstOnWaitList();
+//                check.setClosedBot(waitBot);
+//                logger.info(" Bot "+ waitBot.getBt_Name()+" wird aus der Warteschlange von Checkpunkt "+check.getName()+" geholt");
+//                check = checkpoints.get(waitBot.getCheckpoint());                
+//                b = waitBot.ContinueAfterWaitList();
+//                
+//                logger.info("Ueberpruefung  ob sich Bots in der Warteschlange von Checkpunkt "+check.getName()+" befinden");
+//                
+//                if (check.isStoreOrExit()) {
+//                	if(check.isBotInWaitList())
+//                	{
+//	                    check.setClosedBot(null);
+//	                    check.setReservedBot(null);
+//	                    
+//	                    view.UpdateClosedpoint(check.getName(), false);
+//	                    waitBot = check.getFirstOnWaitList();
+//	                    
+//	                    if(!waitBot.IsinPuffer() && waitBot.HavePufferReserved())
+//	                    {
+//	                    	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
+//	                    	if(puffer != null)
+//	                    		puffer.setReservedBot(null);
+//	                    }
+//	                    check.setReservedBot(waitBot);
+//	                    b = waitBot.ContinueAfterWaitList();
+//	                    logger.info("Checkpunkts  "+ check.getName()+" für Bot "+waitBot.getBt_Name()+" freigeben");
+//	                    
+//	                    b = false;
+//                	}
+//                }
+//                
+//            }
+//            logger.info("Keine Bots an Checkpunkt "+check.getName() + ", deswegen  wird er entsperrt");
+//            
+//            check.setClosedBot(null);
+//            check.setReservedBot(null);
+//            view.UpdateClosedpoint(check.getName(), false);
+//            
+//            logger.info("WorkOffWaitList  beendet");
+//        }
+//    }
+    
     /**
      * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung hÃ¤ndelt
      */
@@ -482,37 +538,35 @@ public class Controller implements IController, IStockInput {
             while (check.isBotInWaitList() && b) {
             	
                 Bot waitBot = check.getFirstOnWaitList();
-                check.setClosedBot(waitBot);
                 logger.info(" Bot "+ waitBot.getBt_Name()+" wird aus der Warteschlange von Checkpunkt "+check.getName()+" geholt");
-                b = waitBot.ContinueAfterWaitList();
-                check = checkpoints.get(waitBot.getCheckpoint());
-                logger.info("Ueberpruefung  ob sich Bots in der Warteschlange von Checkpunkt "+check.getName()+" befinden");
                 
-                if (check.isReserved()) {
-                	if(check.isBotInWaitList())
-                	{
-	                    check.setClosedBot(null);
-	                    check.setReservedBot(null);
-	                    
-	                    view.UpdateClosedpoint(check.getName(), false);
-	                    waitBot = check.getFirstOnWaitList();
-	                    
-	                    if(!waitBot.IsinPuffer() && waitBot.HavePufferReserved())
-	                    {
-	                    	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
-	                    	if(puffer != null)
-	                    		puffer.setReservedBot(null);
-	                    }
-	                    check.setReservedBot(waitBot);
-	                    waitBot.ContinueAfterWaitList();
-	                    logger.info("Checkpunkts  "+ check.getName()+" für Bot "+waitBot.getBt_Name()+" freigeben");
-	                    
-	                    b = false;
-                	}
-                }
+                
+                if(check.isStoreOrExit())
+                {
+                	check.setClosedBot(null);
+                    check.setReservedBot(null);
+                    
+                    if(!waitBot.IsinPuffer() && waitBot.HavePufferReserved())
+                    {
+                    	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
+                    	if(puffer != null)
+                    		puffer.setReservedBot(null);
+                    }
+                    
+                    check.setReservedBot(waitBot);
+                }else
+                {
+                	check.setClosedBot(waitBot);
+                }           
+                
+                check = checkpoints.get(waitBot.getCheckpoint()); 
+                b = waitBot.ContinueAfterWaitList();
+                              
+                
                 
             }
-            logger.info("Keine Bots an Checkpunkt "+check.getName() + ", deswegen  wird er entsperrt");
+            logger.info("Keine Bots in der Warteschlange von Checkpunkt "+check.getName() + ", deswegen  wird er entsperrt");
+            
             check.setClosedBot(null);
             check.setReservedBot(null);
             view.UpdateClosedpoint(check.getName(), false);

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Roboter implements IRoboter {
 
-    float tp = 300;
+    float tp = 350;
     float light;
     float high;
     float low;
@@ -17,7 +17,7 @@ public class Roboter implements IRoboter {
     float error;
     float turn;
     
-    float kp = 12;
+    float kp = 15;
     private CheckpointList map;
     private Checkpoint park_Position;
     private Checkpoint position;
@@ -206,7 +206,6 @@ public class Roboter implements IRoboter {
 		  } else if (!isLoaded && nextCheckOther != null && nextCheckOther == check_store) {
                 this.EntranceModus(nextCheckOther, nextCheckWay, order.getId(), true);
                 isLoaded = true;
-                left_curve = true;
 
                 this.position = nextCheckWay;
                 nextCheckWay = position.getNext_WayCheckpoint();
@@ -215,7 +214,6 @@ public class Roboter implements IRoboter {
             } else if (isLoaded && nextCheckOther != null && nextCheckOther == check_exit) {
                 this.EntranceModus(nextCheckOther, nextCheckWay, order.getId(), false);
                 isLoaded = false;
-                left_curve = true;
 
                 this.position = nextCheckWay;
                 nextCheckWay = position.getNext_WayCheckpoint();
@@ -223,11 +221,6 @@ public class Roboter implements IRoboter {
 
             }
 
-            
-		  if (left_curve) {
-              left_curve = false;
-              this.links45();
-          }
 		  
 		  	this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
                     new Message(RoboterData.code_NextCheckpoint, nextCheckWay.getName()));                       
@@ -261,7 +254,7 @@ public class Roboter implements IRoboter {
     private void Parking() {
         LCD.drawString("PARKEN!! ", 0, 2);
 
-        this.links90();
+        this.rechts90();
         
         this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
                 new Message(RoboterData.code_NextCheckpoint, this.park_Position.getName()));
@@ -295,7 +288,7 @@ public class Roboter implements IRoboter {
 
         this.position = position.getNext_WayCheckpoint();
 
-        this.links45();
+        this.rechts45();
         this.IsParking = false;
     }
 
@@ -364,8 +357,8 @@ public class Roboter implements IRoboter {
             LCD.drawString("Rechts: " + (tp - turn), 0, 3);
 
 
-            leftMotor.setSpeed(tp + turn);
-            rightMotor.setSpeed(tp - turn);
+            leftMotor.setSpeed(tp - turn);
+            rightMotor.setSpeed(tp + turn);
         }
 
         this.leftMotor.stop(true);
@@ -385,7 +378,7 @@ public class Roboter implements IRoboter {
     private void EntranceModus(Checkpoint entrance, Checkpoint exit, String order_id, boolean status) {
         try {
             
-        	this.links90();
+        	this.rechts90();
         	
         	this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
                     new Message(RoboterData.code_NextCheckpoint, entrance.getName()));            
@@ -408,7 +401,7 @@ public class Roboter implements IRoboter {
             message.add(new Message((status ? RoboterData.code_FinishLoad : RoboterData.code_FinishUnload), order_id));
             message.add(new Message(RoboterData.code_NextCheckpoint, exit.getName()));
 
-            this.rechts90();
+            this.links120();
             this.bt.SendPosition(Protokoll.MessageToString(message));
             this.WaiteForOk();
 
@@ -474,7 +467,7 @@ public class Roboter implements IRoboter {
     		this.CheckForContinue(new Message(RoboterData.code_Checkpoint, this.position.getName()),
                     new Message(RoboterData.code_NextCheckpoint, puffer.getName()));
     		
-    		this.links90();
+    		this.rechts90();
 	        this.fahreZu( puffer.getColor());
 	        this.turn180();
 	        
@@ -502,7 +495,7 @@ public class Roboter implements IRoboter {
 	        
 	        this.fahreZu(position.getColor());
 
-	//        this.links90();   
+	        this.rechts45();   
 	        this.toPuffer = false;
 	        this.puffer_position = null;
     	}
@@ -518,6 +511,29 @@ public class Roboter implements IRoboter {
         leftMotor.setSpeed(200);
         rightMotor.rotate(450);
     }
+    
+    void links120() {
+
+        this.leftMotor.stop(true);
+        this.rightMotor.stop(true);
+
+        rightMotor.setSpeed(200);
+        leftMotor.setSpeed(200);
+        rightMotor.rotate(580);
+    	
+//    	this.rightMotor.stop(true);
+//
+//        rightMotor.setSpeed(200);
+//        leftMotor.setSpeed(200);
+//        leftMotor.backward();
+//        rightMotor.forward();
+//
+//        Delay.msDelay(800);
+//        
+//        rightMotor.rotate(80);
+    }
+    
+    
     void rechts90() {
 
         this.leftMotor.stop(true);
@@ -537,6 +553,16 @@ public class Roboter implements IRoboter {
         leftMotor.setSpeed(200);
         rightMotor.rotate(360);
     }
+    
+    void rechts45() {
+
+        this.leftMotor.stop(true);
+        this.rightMotor.stop(true);
+
+        rightMotor.setSpeed(200);
+        leftMotor.setSpeed(200);
+        leftMotor.rotate(360);
+    }
 
     void turn180() {
 
@@ -548,7 +574,7 @@ public class Roboter implements IRoboter {
         leftMotor.backward();
         rightMotor.forward();
 
-        Delay.msDelay(2300);
+        Delay.msDelay(1800);
 
 
     }
