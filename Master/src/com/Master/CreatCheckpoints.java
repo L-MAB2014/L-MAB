@@ -10,42 +10,42 @@ public class CreatCheckpoints {
      * @return Map mit den Checkpoints des Lagers(Map)
      */
     public static HashMap<String, Checkpoint> InitializeCheckpoints() {
-        Checkpoint s1 = new Checkpoint("S1", false);
-        Checkpoint s2 = new Checkpoint("S2", false);
-        Checkpoint s3 = new Checkpoint("S3", false);
-        Checkpoint s4 = new Checkpoint("S4", false);
-        Checkpoint s5 = new Checkpoint("S5", false);
-        Checkpoint s6 = new Checkpoint("S6", false);
+        Checkpoint s1 = new Checkpoint("S1", false, false);
+        Checkpoint s2 = new Checkpoint("S2", false, false);
+        Checkpoint s3 = new Checkpoint("S3", false, false);
+        Checkpoint s4 = new Checkpoint("S4", false, false);
+        Checkpoint s5 = new Checkpoint("S5", false, false);
+        Checkpoint s6 = new Checkpoint("S6", false, false);
 
-        Checkpoint pl1 = new Checkpoint("PL1", true);
-        Checkpoint pl2 = new Checkpoint("PL2", true);
-        Checkpoint pl3 = new Checkpoint("PL3", true);
+        Checkpoint pl1 = new Checkpoint("PL1", true, false);
+        Checkpoint pl2 = new Checkpoint("PL2", true, false);
+        Checkpoint pl3 = new Checkpoint("PL3", true, false);
 
-        Checkpoint c1 = new Checkpoint("C1", false);
-        Checkpoint c2 = new Checkpoint("C2", false);
-        Checkpoint c3 = new Checkpoint("C3", false);
+        Checkpoint c1 = new Checkpoint("C1", false, false);
+        Checkpoint c2 = new Checkpoint("C2", false, false);
+        Checkpoint c3 = new Checkpoint("C3", false, false);
 
-        Checkpoint pf1 = new Checkpoint("PF1", false);
-        Checkpoint pf2 = new Checkpoint("PF2", false);
-        Checkpoint pf3 = new Checkpoint("PF3", false);
+        Checkpoint pf1 = new Checkpoint("PF1", false, false);
+        Checkpoint pf2 = new Checkpoint("PF2", false, false);
+        Checkpoint pf3 = new Checkpoint("PF3", false, false);
 
-        Checkpoint e1 = new Checkpoint("E1", false);
-        Checkpoint e2 = new Checkpoint("E2", false);
-        Checkpoint e3 = new Checkpoint("E3", false);
-        Checkpoint e4 = new Checkpoint("E4", false);
+        Checkpoint e1 = new Checkpoint("E1", false, false);
+        Checkpoint e2 = new Checkpoint("E2", false, false);
+        Checkpoint e3 = new Checkpoint("E3", false, false);
+        Checkpoint e4 = new Checkpoint("E4", false, false);
 
-        Checkpoint pu1 = new Checkpoint("PU1", true);
-        Checkpoint pu2 = new Checkpoint("PU2", true);
+        Checkpoint pu1 = new Checkpoint("PU1", false, true);
+        Checkpoint pu2 = new Checkpoint("PU2", false, true);
 
-        Checkpoint cp1 = new Checkpoint("CP1", false);
-        Checkpoint cp2 = new Checkpoint("CP2", false);
-        Checkpoint cp3 = new Checkpoint("CP3", false);
-        Checkpoint cp4 = new Checkpoint("CP4", false);
+        Checkpoint cp1 = new Checkpoint("CP1", false, false);
+        Checkpoint cp2 = new Checkpoint("CP2", false, false);
+        Checkpoint cp3 = new Checkpoint("CP3", false, false);
+        Checkpoint cp4 = new Checkpoint("CP4", false, false);
 
-        Checkpoint p1 = new Checkpoint("P1", false);
-        Checkpoint p2 = new Checkpoint("P2", false);
-        Checkpoint p3 = new Checkpoint("P3", false);
-        Checkpoint p4 = new Checkpoint("P4", false);
+        Checkpoint p1 = new Checkpoint("P1", false, false);
+        Checkpoint p2 = new Checkpoint("P2", false, false);
+        Checkpoint p3 = new Checkpoint("P3", false, false);
+        Checkpoint p4 = new Checkpoint("P4", false, false);
 
         s1.setNextCheckpoints(s2, pl1);
         s1.setPeviousCheckpoints(cp4, null);

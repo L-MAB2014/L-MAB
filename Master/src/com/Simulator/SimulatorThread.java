@@ -1,6 +1,6 @@
 package com.Simulator;
 
-import java.util.logging.Logger;
+import org.apache.log4j.LogManager;
 
 import com.Master.IStockInput;
 
@@ -15,7 +15,7 @@ public class SimulatorThread extends Thread {
 	/**
 	 * logger
 	 */
-	private static Logger logger = Logger.getAnonymousLogger();
+	private static org.apache.log4j.Logger logger = LogManager.getLogger("Controller");
 	
 	SimulatorThread(SimulatorStock s, IStockInput input)
 	{

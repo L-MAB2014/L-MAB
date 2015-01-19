@@ -25,18 +25,41 @@ public class Stock {
 	{
 		return objekts.remove(order);
 	}
-	
-	public Order getFirstObjekt()
-	{
-		if(objekts.size() != 0)
-			return objekts.remove(0);
-		return null;
-	}
-	
+		
 	public String getName() {
 		return this.checkpoint.getName();
 	}
 	
+	public String getNextDelivery()
+	{
+		return this.objekts.get(0).getId();
+	}
+	
+	public Order GiveFirstOrder()
+	{
+		return objekts.size() != 0 ?this.objekts.get(0): null;
+	}
+	
+	public Order GiveOrderByPosition(int pos )
+	{
+		return objekts.size() > pos ? this.objekts.get(pos): null;
+	}
+	
+	public int SumObjekts()
+	{
+		return this.objekts.size();
+	}
+	
+	public Order getNextFreeOrder()
+	{
+		for(int i =0; i < objekts.size(); ++i)
+		{
+			Order o = objekts.get(i);
+			if(!o.HaveBot())
+				return o;
+		}
+		return null;
+	}
 	
 	public void clear() {
 		objekts.clear();

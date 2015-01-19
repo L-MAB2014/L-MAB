@@ -20,13 +20,29 @@ public class Order {
      * Ziel wo die Lieferung abgeliefert werden soll
      */
     private String exit_place;
+    
+    
+    
+    private Bot bot;
 
     Order(String id, String store, String exit) {
-        this.id = id;
+    	this.id = id;
         this.exit_place = exit;
         this.store_place = store;
+        this.bot = null;
     }
-
+    
+    public boolean HaveBot()
+    {
+    	return (bot != null);
+    }
+    
+    public void SetBot(Bot bot)
+    {
+    	this.bot = bot;
+    }
+    
+    
     /**
      * Gibt die ID der Order zurück
      *

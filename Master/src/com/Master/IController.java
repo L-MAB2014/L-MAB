@@ -36,11 +36,16 @@ public interface IController {
 
     abstract boolean TestEntranceForPuffer(String entrance, Bot bot);
     abstract Checkpoint NextFreePuffer();
-    abstract boolean CheckpointReserved(String entrance, Bot bot);
+    abstract boolean ExitReserved(String exit, Bot bot);
+    abstract boolean StoreReserved(String entrance, Bot bot);
+    abstract boolean CheckpointReserved(String check, Bot bot);
+    
     abstract void SetOnWaitList(String check, Bot bot);
     
     abstract public void OrderLoad(Order order);
     abstract public  void OrderUnload(Order order, Bot bot);
+    
+    abstract public Order NextOrderForBot();
     
     
 }

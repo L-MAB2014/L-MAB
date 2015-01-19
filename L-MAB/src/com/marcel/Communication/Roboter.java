@@ -519,7 +519,7 @@ public class Roboter implements IRoboter {
 
         rightMotor.setSpeed(200);
         leftMotor.setSpeed(200);
-        rightMotor.rotate(580);
+        rightMotor.rotate(550);
     	
 //    	this.rightMotor.stop(true);
 //

@@ -6,8 +6,11 @@ import com.View.View;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.*;
 
@@ -41,20 +44,22 @@ public class Controller implements IController, IStockInput {
     private HashMap<String, Checkpoint> checkpoints;
     
     /**
-     * Enth√ºllt alle Ein und Ausg‰nge des Lagers
+     * Enth√ºllt alle Eing‰nge des Lagers
      */
-    private HashMap<String, Stock> stocks;
+    private Map<String, Stock> stocks;
+    
+    /**
+     * Enth√ºllt alle Ausg‰nge des Lagers
+     */
+    private Map<String, Exit> exits;
 
-    //TODO Kann sp√§ter Weg
-    private int order_ID;
 
-    //TODO Kann sp√§ter Weg
-    private int counter;
+
+
 
     Controller() {
         this.controller = this;
-        this.order_ID = 0;
-        this.counter = 0;
+
         this.view = new View();
         
         logger.info("Oberflaeche wird geˆffnet und und die Actionlistener gesetzt");
@@ -78,8 +83,10 @@ public class Controller implements IController, IStockInput {
         this.stocks.put("PL2", new Stock(this.checkpoints.get("PL2")));
         this.stocks.put("PL3", new Stock(this.checkpoints.get("PL3")));
         
-        this.stocks.put("PU1", new Stock(this.checkpoints.get("PU1")));
-        this.stocks.put("PU2", new Stock(this.checkpoints.get("PU2")));
+        this.exits = new HashMap<String, Exit>();
+        
+        this.exits.put("PU1", new Exit(this.checkpoints.get("PU1")));
+        this.exits.put("PU2", new Exit(this.checkpoints.get("PU2")));
         
         this.simulator = new Simulator(this);
     }
@@ -250,36 +257,92 @@ public class Controller implements IController, IStockInput {
 
     }
 
-    public synchronized boolean CheckpointReserved(String entrance, Bot bot) {
-        Checkpoint check = checkpoints.get(entrance);
+    public synchronized boolean ExitReserved(String exit, Bot bot) {
+        
+    	logger.info("Checkpoint "+ this.checkpoints.get(exit).getName()+" soll von "+bot.getBt_Name()+" reserviert");
+    	Exit ex = this.exits.get(exit);
+    
+        if(ex != null)
+        {
+        	String nextID = ex.getNextDelivery(); 
+        	logger.info("Ausgang erwartet als n‰chstes "+ nextID+" und der Bot hat  "+bot.getOrderID() +" geladen");
+        	if(nextID.equals(bot.getOrderID()))
+        	{
+        		view.UpdateClosedpoint(exit, true);
+                this.checkpoints.get(exit).setReservedBot(bot);
+                logger.info("Checkpoint "+ this.checkpoints.get(exit).getName()+" wurde reserviert");
+                return true;
+        	}else
+        	{
+        		logger.info("Checkpoint "+ exit+" konnte nicht reserviert werden, da "+ex.getNextDelivery()+" erwartet wird und nicht "+bot.getOrderID()+" als n‰chstes");
+        	}
+        }else
+        {
+        	logger.info("Exit -Checkpoint "+ exit+"  nicht vorhanden");
+        }
 
-        if (!check.isReserved() || check.BotHaveClosesOrReserved(bot) ) {       	
-        	view.UpdateClosedpoint(entrance, true);
-            check.setReservedBot(bot);
-            logger.info("Checkpoint "+ check.getName()+" wurde reserviert");
+        return false;
+    }
+    
+    public synchronized boolean StoreReserved(String store, Bot bot) {
+    	Stock ex = this.stocks.get(store);
+        
+        if(ex != null)
+        {
+        	if(ex.getNextDelivery().equals(bot.getOrderID()))
+        	{
+        		view.UpdateClosedpoint(store, true);
+                this.checkpoints.get(store).setReservedBot(bot);
+                logger.info("Checkpoint "+ this.checkpoints.get(store).getName()+" wurde reserviert");
+                return true;
+        	}else
+        	{
+        		logger.info("Checkpoint "+ store+" konnte nicht reserviert werden, da "+ex.getNextDelivery()+" erwartet wird und nicht "+bot.getOrderID()+" als n‰chstes");
+        	}
+        }else
+        {
+        	logger.info("Exit -Checkpoint "+ store+"  nicht vorhanden");
+        }
+
+        return false;
+    }
+    
+    public synchronized boolean CheckpointReserved(String check, Bot bot) {
+        Checkpoint checkpoint = checkpoints.get(check);     
+        
+        if (!checkpoint.isReserved() || checkpoint.BotHaveClosesOrReserved(bot) ) {       	
+        	view.UpdateClosedpoint(check, true);
+            checkpoint.setReservedBot(bot);
+            logger.info("Checkpoint "+ checkpoint.getName()+" wurde reserviert");
             return true;
         }
-        logger.info("Checkpoint "+ check.getName()+" konnte nicht reserviert werden, da dieser schon reserviert ist");
+        logger.info("Checkpoint "+ checkpoint.getName()+" konnte nicht reserviert werden, da dieser schon reserviert ist");
         return false;
     }
     
     public synchronized void ObjektToStock(String id, String stock, String target)
     {
     	Order order = new Order(id,stock,target);
-    	if (counter >= bots.size()) {
-		    counter = 0;
-		}
+
 		    	
     	Bot bot = null;
-    	if(bots.size() > 0 )
+    	for (int i = 0; i < bots.size() && bot == null ; ++i )
     	{
-    		bot = this.bots.get(counter);
-    		counter++;
-	    	bot.NewOrder(order);
+    		Bot b = this.bots.get(i);
+    		if(!b.HaveOrder())
+    		{
+    			bot = b;
+    		}
     	}
     	
     	Stock s = stocks.get(stock);
     	s.addOrder(order);
+    	
+    	if(bot != null)
+    	{
+    		order.SetBot(bot);
+    		bot.NewOrder(order);
+    	}
     	
     	view.InputStoreTable(s.getName(), id, target, bot != null ? bot.getBt_Name():"-");
     	
@@ -289,6 +352,12 @@ public class Controller implements IController, IStockInput {
     public synchronized void OrderLoad(Order order)
     {
     	try{
+    		Stock st = this.stocks.get(order.getStore_place());
+    		st.removeOrder(order);
+    		
+    		Exit ex = this.exits.get(order.getExit_place());
+    		ex.OrderonWay(order.getId());
+    		
     		view.DeleteFirstStoreTable(order.getStore_place(), order.getId());
     	}catch(Exception e)
     	{
@@ -299,11 +368,30 @@ public class Controller implements IController, IStockInput {
     public synchronized void OrderUnload(Order order, Bot bot)
     {
     	try{
+    		Exit ex = this.exits.get(order.getExit_place());    		
+    		ex.addOrder(order);
+    		
     		view.InputExitTable(order.getExit_place(), order.getId(), order.getExit_place(), bot.getBt_Name());
 		}catch(Exception e)
 		{
 			logger.info("OrderUnload : "+e);
 		}
+    }
+    
+    public synchronized Order NextOrderForBot()
+    {
+	    try{
+	    	List<Stock> s = new ArrayList<Stock>(this.stocks.values());
+	    	Collections.sort(s, new StokComperator() );
+	    	Stock first = s.get(0);
+	    	
+	    	return first.getNextFreeOrder();
+	    }catch(Exception e)
+	    {
+	    	logger.info("NextOrderForBot : "+e);
+	    	return null;
+	    }
+    	
     }
     
     public void Stop()
@@ -430,6 +518,10 @@ public class Controller implements IController, IStockInput {
         	logger.info("Der Menueeintrag Simulation -> Start wurde betaetigt");
         	
         	simulator.CreatSimulateData();
+        	
+        	exits.get("PU1").setOrderList(simulator.getOrdertoExit1());
+        	exits.get("PU2").setOrderList(simulator.getOrdertoExit2());
+        	
         	simulator.StartSimulat();
         }
     }
@@ -461,64 +553,7 @@ public class Controller implements IController, IStockInput {
         }
     }
 
-//    /**
-//     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung h√§ndelt
-//     */
-//    private class WorkOffWaitList extends Thread {
-//        Checkpoint check;
-//        WorkOffWaitList(Checkpoint cp) {
-//            this.check = cp;
-//        }
-//
-//        /* (non-Javadoc)
-//         * @see java.lang.Thread#run()
-//         */
-//        public void run() {
-//        	logger.info("WorkOffWaitList  fuer den Checkpunkt "+check.getName()+" gestartet");
-//            boolean b = true;
-//            while (check.isBotInWaitList() && b) {
-//            	
-//                Bot waitBot = check.getFirstOnWaitList();
-//                check.setClosedBot(waitBot);
-//                logger.info(" Bot "+ waitBot.getBt_Name()+" wird aus der Warteschlange von Checkpunkt "+check.getName()+" geholt");
-//                check = checkpoints.get(waitBot.getCheckpoint());                
-//                b = waitBot.ContinueAfterWaitList();
-//                
-//                logger.info("Ueberpruefung  ob sich Bots in der Warteschlange von Checkpunkt "+check.getName()+" befinden");
-//                
-//                if (check.isStoreOrExit()) {
-//                	if(check.isBotInWaitList())
-//                	{
-//	                    check.setClosedBot(null);
-//	                    check.setReservedBot(null);
-//	                    
-//	                    view.UpdateClosedpoint(check.getName(), false);
-//	                    waitBot = check.getFirstOnWaitList();
-//	                    
-//	                    if(!waitBot.IsinPuffer() && waitBot.HavePufferReserved())
-//	                    {
-//	                    	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
-//	                    	if(puffer != null)
-//	                    		puffer.setReservedBot(null);
-//	                    }
-//	                    check.setReservedBot(waitBot);
-//	                    b = waitBot.ContinueAfterWaitList();
-//	                    logger.info("Checkpunkts  "+ check.getName()+" f¸r Bot "+waitBot.getBt_Name()+" freigeben");
-//	                    
-//	                    b = false;
-//                	}
-//                }
-//                
-//            }
-//            logger.info("Keine Bots an Checkpunkt "+check.getName() + ", deswegen  wird er entsperrt");
-//            
-//            check.setClosedBot(null);
-//            check.setReservedBot(null);
-//            view.UpdateClosedpoint(check.getName(), false);
-//            
-//            logger.info("WorkOffWaitList  beendet");
-//        }
-//    }
+
     
     /**
      * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung h√§ndelt
@@ -535,43 +570,175 @@ public class Controller implements IController, IStockInput {
         public void run() {
         	logger.info("WorkOffWaitList  fuer den Checkpunkt "+check.getName()+" gestartet");
             boolean b = true;
-            while (check.isBotInWaitList() && b) {
+            while (check != null && check.isBotInWaitList() && b) {
             	
-                Bot waitBot = check.getFirstOnWaitList();
-                logger.info(" Bot "+ waitBot.getBt_Name()+" wird aus der Warteschlange von Checkpunkt "+check.getName()+" geholt");
+            	check.setClosedBot(null);
+                check.setReservedBot(null);
                 
-                
-                if(check.isStoreOrExit())
+                if(check.isStore() || check.isExit())
                 {
-                	check.setClosedBot(null);
-                    check.setReservedBot(null);
+                	logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" handelt es sich um ein Lager oder Ausgang");
+                	List<Bot> checkWaitList = check.getWaitList();
+                	Bot waitBot = null;
+                	
+                	if(check.isStore())
+                	{
+                		logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" handelt es sich um ein Lager");
+                		Stock st = stocks.get(check.getName());
+                		String id = st.getNextDelivery();
+                		
+                		logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" artikel "+id+" muss als n‰chstes abgeholt werden");
+                		for(int i = 0; (i < checkWaitList.size()) && (waitBot == null); ++i)
+                		{
+                			Bot bot = checkWaitList.get(i);
+                			logger.info("WorkOffWaitList Checkpunkt "+check.getName()+"  Bot "+bot.getBt_Name()+" befindet sich in der Wartreschlange");
+                			if(id.equals(bot.getOrderID()))
+                			{
+                				logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" Bot "+ bot.getBt_Name()+" hat den Auftrag f¸r Artikel "+id);
+                				waitBot = bot;
+                				checkWaitList.remove(bot);
+                			}else
+                			{
+                				logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" Bot "+ bot.getBt_Name()+" hat NICHT den Auftrag f¸r Artikel "+id);
+                			}
+                		}
+                	}else if(check.isExit())
+                	{
+                		logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" handelt es sich um einen Ausgang");
+                		Exit ex = exits.get(check.getName());
+                		String id = ex.getNextDelivery();
+                		
+                		logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" artikel "+id+" muss als n‰chstes geliefert werden");
+                		
+                		for(int i = 0; (i < checkWaitList.size()) && (waitBot == null); ++i)
+                		{
+                			Bot bot = checkWaitList.get(i);
+                			logger.info("WorkOffWaitList Checkpunkt "+check.getName()+"  Bot "+bot.getBt_Name()+" befindet sich in der Wartreschlange");
+                			if(id.equals(bot.getOrderID()))
+                			{
+                				logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" Bot "+ bot.getBt_Name()+" hat den Auftrag f¸r Artikel "+id);
+                				waitBot = bot;
+                				checkWaitList.remove(bot);
+                			}else
+                			{
+                				logger.info("WorkOffWaitList Checkpunkt "+check.getName()+" Bot "+ bot.getBt_Name()+" hat NICHT den Auftrag f¸r Artikel "+id);
+                			}
+                		}
+                	}
+                	                    
                     
-                    if(!waitBot.IsinPuffer() && waitBot.HavePufferReserved())
+                    if(waitBot != null)
                     {
-                    	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
-                    	if(puffer != null)
-                    		puffer.setReservedBot(null);
+                    	logger.info(" Bot "+ waitBot.getBt_Name()+" wird aus der Warteschlange von Checkpunkt "+check.getName()+" geholt"); 
+                    	if(!waitBot.IsinPuffer() && waitBot.HavePufferReserved())
+		                {
+		                	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
+		                	if(puffer != null)
+		                		puffer.setReservedBot(null);
+		                }
+                    	check.setReservedBot(waitBot);
+                    	check = checkpoints.get(waitBot.getCheckpoint()); 
+                        b = waitBot.ContinueAfterWaitList();
+                    	
+                    }else if(waitBot == null)
+                    {
+                    	logger.info("Kein Passender Bot in der  Warteschlange von Checkpunkt "+check.getName()); 
+                    	
+                    	b = false;
+                    	check = null;                    	
                     }
-                    
-                    check.setReservedBot(waitBot);
+
                 }else
                 {
+                	Bot waitBot = check.getFirstOnWaitList();
+                    logger.info(" Bot "+ waitBot.getBt_Name()+" wird aus der Warteschlange von Checkpunkt "+check.getName()+" geholt");                    
+                	
                 	check.setClosedBot(waitBot);
-                }           
-                
-                check = checkpoints.get(waitBot.getCheckpoint()); 
-                b = waitBot.ContinueAfterWaitList();
-                              
-                
+                	
+                	check = checkpoints.get(waitBot.getCheckpoint()); 
+                    b = waitBot.ContinueAfterWaitList();
+                }                   
                 
             }
-            logger.info("Keine Bots in der Warteschlange von Checkpunkt "+check.getName() + ", deswegen  wird er entsperrt");
             
-            check.setClosedBot(null);
-            check.setReservedBot(null);
-            view.UpdateClosedpoint(check.getName(), false);
+            
+            if(check != null)
+            {
+            	logger.info("Keine Bots in der Warteschlange von Checkpunkt "+check.getName() + ", deswegen  wird er entsperrt");
+            	check.setClosedBot(null);
+                check.setReservedBot(null);
+                view.UpdateClosedpoint(check.getName(), false);
+            }
+            
             
             logger.info("WorkOffWaitList  beendet");
         }
+    }
+    
+    public class StokComperator implements Comparator <Stock>
+    {
+    	@Override
+    	public int compare(Stock s1, Stock s2)
+    	{
+    		int pos = 0;    		
+    		
+    		while (true)
+    		{
+    			Order o1 = s1.GiveOrderByPosition(pos);
+        		Order o2 = s2.GiveOrderByPosition(pos);
+        		
+        		if(o1 == null && o2 != null)
+        			return 1;
+        		
+        		if(o1 != null && o2 == null)
+        			return -1;		
+       		
+        		if(o1 == null && o2 == null)
+        			return 0;
+        		
+        		if(o1.HaveBot() && !o2.HaveBot())
+        			return 1;
+        		
+        		if(!o1.HaveBot() && o2.HaveBot())
+    				return -1;	
+        		
+        		if(!o1.HaveBot() && !o2.HaveBot())
+        		{        			        			
+        			Exit e1 = exits.get(o1.getExit_place());
+        			Exit e2 = exits.get(o2.getExit_place());
+        			
+        			int pos1 = e1.OrderPostion(o1.getId());
+        			int pos2 = e2.OrderPostion(o2.getId());;
+        			
+        			if(pos1 > pos2)
+            			return 1;
+            		
+        			if(pos1 < pos2)
+            			return -1;		
+           		
+        			if(pos1 == pos2)
+        			{
+        				int sum1 = s1.SumObjekts();
+        				int sum2 = s2.SumObjekts();
+        				
+        				if(sum1 > sum2)
+                			return 1;
+                		
+            			if(sum1 < sum2)
+                			return -1;		
+               		
+            			if(sum1 == sum2)
+            				return 0;
+        			}
+        		}
+	
+        		++pos;
+        		
+    		}
+    	}
+    	
+    	
+    	
+    	
     }
 }

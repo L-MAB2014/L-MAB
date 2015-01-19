@@ -49,6 +49,8 @@ public class Bot implements IBot {
      * Order-Verwaltung
      */
     private OrderManagement order_management;
+    
+    private Order order;
 
     /**
      * Status
@@ -108,7 +110,9 @@ public class Bot implements IBot {
         logger.info("Fuer Bot "+bt_Name+" wird ein BT-Objekt angelegt");
         this.bt = new BT(this.bt_Name, this.controller, this);
         logger.info("Fuer Bot "+bt_Name+" wurde ein BT-Objekt angelegt");
+       
         this.order_management = new OrderManagement();
+        this.order = null;
         
         this.m_waitList = new ArrayList<Message>();
         this.m_waitListCheckpoint = new ArrayList<Message>();
@@ -168,20 +172,39 @@ public class Bot implements IBot {
      * @param order Neue order des Bots
      */
     public void NewOrder(Order order) {
-        this.order_management.add(order);
-        String message = Protokoll.OrderToString(order);
-        this.InfoUpdate();
-
-        if (bt.SendMessage(message))
-            {
-        	logger.info("Die Nachricht "+message+" für Bot "+bt_Name+" wurde erfolgreich gesendet");	
-        	this.controller.InputConsole("Nachricht " + message + " wurde erfolgreich gesendet");
-            }
-        else
+        if(this.order == null)
         {
-        	logger.info("Die Nachricht "+message+" für Bot "+bt_Name+" konnte nicht gesendet werden");
-        	this.controller.InputConsole("Fehler beim senden der Nachricht " + message);
+        	
+        	if(order != null)
+        	{
+        		this.order = order;
+        		String message = Protokoll.OrderToString(order);
+			    this.InfoUpdate();
+			
+			    if (bt.SendMessage(message))
+			        {
+			    	logger.info("Die Nachricht "+message+" für Bot "+bt_Name+" wurde erfolgreich gesendet");	
+			    	this.controller.InputConsole("Nachricht " + message + " wurde erfolgreich gesendet");
+			        }
+			    else
+			    {
+			    	logger.info("Die Nachricht "+message+" für Bot "+bt_Name+" konnte nicht gesendet werden");
+			    	this.controller.InputConsole("Fehler beim senden der Nachricht " + message);
+			    }
+        	}else
+            {
+            	logger.info("Bot "+bt_Name+"hat keine eine neue Aufgabe erhalten");
+            }
+        }else
+        {
+        	logger.error("Bot "+bt_Name+" wurde eine neue Aufgabe ("+order.getId()+") zugewisen, obwohl ider noch eine hat"+this.order.getId()+")");
         }
+		    
+    }
+    
+    public void OrderFinish()
+    {
+    	
     }
 
     /**
@@ -266,126 +289,144 @@ public class Bot implements IBot {
      * @see com.Master.IBot#HandleMessageInput(java.lang.String)
      */
     public void HandleMessageInput(String message) {
-        if (message != null && message != "") {
-            controller.InputConsole(this.bt_Name + " (Eingang) : " + message);
-            logger.info("Von Bot "+bt_Name+" ist folgende nachrciht eingegangen: "+message);
-            List<Message> m = Protokoll.StringToMessage(message);
+        try
+        {
+        	if (message != null && message != "") {
+                controller.InputConsole(this.bt_Name + " (Eingang) : " + message);
+                logger.info("Von Bot "+bt_Name+" ist folgende nachrciht eingegangen: "+message);
+                List<Message> m = Protokoll.StringToMessage(message);
 
-            if (m.size() == 2) {
-                Message m1 = m.get(0);
-                Message m2 = m.get(1);
+                if (m.size() == 2) {
+                    Message m1 = m.get(0);
+                    Message m2 = m.get(1);
 
-                if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
-                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach "+m2.getValue()+" will" );
-                	this.UpdateCheckpoint(m1.getValue(), m2.getValue());
-                    this.CheckAndSendForContinue();
-                } else if (m1.getKey().equals(MasterData.code_Checkpoint) && (m2.getKey().equals(MasterData.code_PostionLoad ) || m2.getKey().equals(MasterData.code_PostionUnload ))) {
-                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und auf  "+m2.getValue()+" auf oder abladen will" );
-                    if (m1.getValue().equals(m2.getValue())) {
-                        this.Entrance(m1.getValue());
+                    if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
+                    	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach "+m2.getValue()+" will" );
+                    	this.UpdateCheckpoint(m1.getValue(), m2.getValue());
+                        this.CheckAndSendForContinue();
+                    } else if (m1.getKey().equals(MasterData.code_Checkpoint) && (m2.getKey().equals(MasterData.code_PostionLoad ) || m2.getKey().equals(MasterData.code_PostionUnload ))) {
+                    	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und auf  "+m2.getValue()+" auf oder abladen will" );
+                        if (m1.getValue().equals(m2.getValue())) {
+                            this.Entrance(m1.getValue());
+                        }
+                    } else if (m1.getKey().equals(MasterData.code_FinishLoad) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
+                    	logger.info("Nachricht von Bot "+bt_Name+" das  dieser fertig mit aufladen  ist und nach "+m2.getValue()+" will" );
+                        this.next_checkpoint = m2.getValue();
+                        this.controller.OrderLoad(this.order);
+                        this.CheckAndSendForContinue();
+                        
+                    }else if (m1.getKey().equals(MasterData.code_FinishUnload) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
+                    	logger.info("Nachricht von Bot "+bt_Name+" das dieser fertig  ist mit abladen   und nach "+m2.getValue()+" will" );
+                        this.next_checkpoint = m2.getValue();
+                        this.controller.OrderUnload(this.order, this);
+                        this.order_management.add(this.order);
+                        
+                        this.CheckAndSendForContinue();
+                                                
+                        Order o = this.controller.NextOrderForBot();                       
+                        
+                        this.order = null;
+                        if(o != null)
+                    	{
+                        	o.SetBot(this);
+                    		this.NewOrder(o);                    
+                    	}
+                        
+                    }else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_ParkPosition)) {
+                    	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und parkt" );
+                    	this.Parking();
+                        
+                    }else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_Puffer)) {
+                    	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und im Puffer wartet" );
+                    	this.inPuffer = true;
+                    	this.last_checkpoint = this.checkpoint;
+                    	this.checkpoint = this.puffer; 
+                    	controller.UpdateMap(checkpoint, last_checkpoint, this.bt_Name);
                     }
-                } else if (m1.getKey().equals(MasterData.code_FinishLoad) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
-                	logger.info("Nachricht von Bot "+bt_Name+" das  dieser fertig mit aufladen  ist und nach "+m2.getValue()+" will" );
-                    this.next_checkpoint = m2.getValue();
-                    this.controller.OrderLoad(this.order_management.getById(m1.getValue()));
-                    this.CheckAndSendForContinue();
-                    
-                }else if (m1.getKey().equals(MasterData.code_FinishUnload) && m2.getKey().equals(MasterData.code_NextCheckpoint)) {
-                	logger.info("Nachricht von Bot "+bt_Name+" das dieser fertig  ist mit abladen   und nach "+m2.getValue()+" will" );
-                    this.next_checkpoint = m2.getValue();
-                    this.controller.OrderUnload(this.order_management.getById(m1.getValue()), this);
-                    this.CheckAndSendForContinue();
-                    
-                }else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_ParkPosition)) {
-                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und parkt" );
-                	this.Parking();
-                    
-                }else if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_Puffer)) {
-                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und im Puffer wartet" );
-                	this.inPuffer = true;
-                	this.last_checkpoint = this.checkpoint;
-                	this.checkpoint = this.puffer; 
-                	controller.UpdateMap(checkpoint, last_checkpoint, this.bt_Name);
-                }
-            } else if (m.size() == 3) {
-                Message m1 = m.get(0);
-                Message m2 = m.get(1);
-                Message m3 = m.get(2);
+                } else if (m.size() == 3) {
+                    Message m1 = m.get(0);
+                    Message m2 = m.get(1);
+                    Message m3 = m.get(2);
 
-                if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_Puffer) && m3.getKey().equals(MasterData.code_TestTarget)) {
-                    
-                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach dem Ausgang  "+m3.getValue()+" will" );
-                	if (controller.TestEntranceForPuffer(m3.getValue(), this)) { // PrÃ¼fen ob Lager belegt ist
-                        if (controller.CheckpointReserved(m3.getValue(),this)) { // Lager Reservieren!
+                    if (m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_Puffer) && m3.getKey().equals(MasterData.code_TestTarget)) {
+                        
+                    	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach dem Ausgang  "+m3.getValue()+" will" );
+                    	if (controller.TestEntranceForPuffer(m3.getValue(), this)) { // PrÃ¼fen ob Lager belegt ist
+                            if (controller.ExitReserved(m3.getValue(),this)) { // Lager Reservieren!
+                            	
+                            	List<Message> list = new ArrayList<Message>();
+                            	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                            	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
+
+                                bt.SendMessage(Protokoll.MessageToString(list));                        	
+                                return;
+                            }
+                        }
+
+                        this.controller.SetOnWaitList(m3.getValue(), this) ;            
+                    	Checkpoint p = controller.NextFreePuffer();
+                    	
+                    	
+                    	if(p != null)
+                    	{
+                    		List<Message> list = new ArrayList<Message>();
+                        	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                        	list.add((new Message(MasterData.code_Puffer, p.getName())));
                         	
-                        	List<Message> list = new ArrayList<Message>();
+                        	this.controller.CheckpointReserved(p.getName(), this);
+                        	this.puffer_modus = true;
+                        	this.puffer_reserved = true;
+                        	this.puffer = p.getName();
+
+                            bt.SendMessage(Protokoll.MessageToString(list));
+                            
+                            list.clear();
                         	list.add((new Message(MasterData.code_Continue, m1.getValue())));
                         	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
+                        	
+                        	this.m_waitList = list;
+                    	}
 
-                            bt.SendMessage(Protokoll.MessageToString(list));                        	
-                            return;
-                        }
-                    }
-
-                    this.controller.SetOnWaitList(m3.getValue(), this) ;            
-                	Checkpoint p = controller.NextFreePuffer();
-                	
-                	
-                	if(p != null)
-                	{
-                		List<Message> list = new ArrayList<Message>();
-                    	list.add((new Message(MasterData.code_Continue, m1.getValue())));
-                    	list.add((new Message(MasterData.code_Puffer, p.getName())));
+                        return;                    
+                    }else if(m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_ToPark) && m3.getKey().equals(MasterData.code_TestTarget)) {
+                    
+                    	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach dem Eingang  "+m3.getValue()+" will" );
+                    	List<Message> list = new ArrayList<Message>();
                     	
-                    	this.controller.CheckpointReserved(p.getName(), this);
-                    	this.puffer_modus = true;
-                    	this.puffer_reserved = true;
-                    	this.puffer = p.getName();
+                    	if (controller.TestEntranceForPuffer(m3.getValue(), this)) { // PrÃ¼fen ob Lager belegt ist
+                            if (controller.StoreReserved(m3.getValue(), this)) { // Lager Reservieren!
+                            	
+                            	
+                            	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                            	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
 
-                        bt.SendMessage(Protokoll.MessageToString(list));
-                        
-                        list.clear();
+                                bt.SendMessage(Protokoll.MessageToString(list));                        	
+                                return;
+                            }
+                        }
+                    	
+                    	this.controller.SetOnWaitList(m3.getValue(), this) ;  
+                    	this.puffer_modus = true;	
+                    	
+                    	list.add((new Message(MasterData.code_Continue, m1.getValue())));
+                    	list.add((new Message(MasterData.code_ToPark, this.park_position)));
+                    	bt.SendMessage(Protokoll.MessageToString(list));
+                    	
+                    	
+                    	list.clear();
                     	list.add((new Message(MasterData.code_Continue, m1.getValue())));
                     	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
                     	
                     	this.m_waitList = list;
-                	}
-
-                    return;                    
-                }else if(m1.getKey().equals(MasterData.code_Checkpoint) && m2.getKey().equals(MasterData.code_ToPark) && m3.getKey().equals(MasterData.code_TestTarget)) {
-                
-                	logger.info("Nachricht von Bot "+bt_Name+" das sich dieser auf "+m1.getValue()+" befindet und nach dem Eingang  "+m3.getValue()+" will" );
-                	List<Message> list = new ArrayList<Message>();
-                	
-                	if (controller.TestEntranceForPuffer(m3.getValue(), this)) { // PrÃ¼fen ob Lager belegt ist
-                        if (controller.CheckpointReserved(m3.getValue(), this)) { // Lager Reservieren!
-                        	
-                        	
-                        	list.add((new Message(MasterData.code_Continue, m1.getValue())));
-                        	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
-
-                            bt.SendMessage(Protokoll.MessageToString(list));                        	
-                            return;
-                        }
                     }
-                	
-                	this.controller.SetOnWaitList(m3.getValue(), this) ;  
-                	this.puffer_modus = true;	
-                	
-                	list.add((new Message(MasterData.code_Continue, m1.getValue())));
-                	list.add((new Message(MasterData.code_ToPark, this.park_position)));
-                	bt.SendMessage(Protokoll.MessageToString(list));
-                	
-                	
-                	list.clear();
-                	list.add((new Message(MasterData.code_Continue, m1.getValue())));
-                	list.add((new Message(MasterData.code_Reserved, m3.getValue())));
-                	
-                	this.m_waitList = list;
                 }
+                this.InfoUpdate();
             }
-            this.InfoUpdate();
+        }catch (Exception e)
+        {
+        	logger.info("Bot "+bt_Name+" Execption-HandleMessageInput "+ e);
         }
+    	
     }
     
     public void Stop()
@@ -415,9 +456,21 @@ public class Bot implements IBot {
      * Updatet die Informationen des Bots in der BenutzeroberflÃ¼che (Tabelle)
      */
     public void InfoUpdate() {
-        this.controller.UpdateTable(this.id, new String[]{this.bt_Name, this.status, this.target, this.checkpoint, "" + this.order_management.size()});
+    	String auftrag = this.order != null ? this.order.getId() : "-";
+        this.controller.UpdateTable(this.id, new String[]{this.bt_Name, this.status, this.target, this.checkpoint, auftrag});
     }
-
+    
+    
+    public boolean HaveOrder()
+    {
+    	return (order != null);
+    }
+    
+    public String getOrderID()
+    {
+    	return this.order.getId();
+    }
+    
     /**
      * Gibt den Verbindungsstatus des Bots an
      *

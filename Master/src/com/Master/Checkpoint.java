@@ -58,11 +58,14 @@ public class Checkpoint {
     private List<Bot> waiting_List;
     
     
-    private boolean isStoreOrExit;
+    private boolean isStore;
+    
+    private boolean isExit;
 
-    Checkpoint(String name, boolean storeOrExit) {
+    Checkpoint(String name, boolean store, boolean exit) {
         this.name = name;
-        this.isStoreOrExit = storeOrExit;
+        this.isStore = store;
+        this.isExit = exit;
 
         this.waiting_List = new ArrayList<Bot>();
 
@@ -75,11 +78,16 @@ public class Checkpoint {
         this.previous_OtherCheckpoint = null;
     }
     
-    public boolean isStoreOrExit()
+    public boolean isStore()
     {
-    	return this.isStoreOrExit;
+    	return this.isStore;
     }
 
+    public boolean isExit()
+    {
+    	return this.isExit;
+    }
+    
     /**
      * Setzt die nächsten Checkpunkte des Checkpunktes
      *
@@ -216,7 +224,7 @@ public class Checkpoint {
      * @return Ob der Bot in die Warteliste gesetzt wurde oder nciht
      */
     public boolean setBotOnWaitList(Bot bot) {
-        if (this.isBotInWaitList() || this.isClosed() || this.isReserved()) {
+        if (this.isBotInWaitList() || this.isClosed() || this.isReserved()|| this.isStore || this.isExit) {
             this.waiting_List.add(bot);
             logger.info("Checkpoint-Warteschlange NEU :"+ this.name+ "  "+ 
         			bot.getBt_Name()  +" ## Warteschlangegesamt="+this.waiting_List.size());
@@ -245,5 +253,12 @@ public class Checkpoint {
         	return true;
         
     	return false;
+    }
+    
+    
+    public List<Bot> getWaitList()
+    {
+    	
+    	return this.waiting_List;
     }
 }
