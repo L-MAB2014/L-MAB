@@ -5,10 +5,20 @@ import org.apache.log4j.LogManager;
 import com.Master.IStockInput;
 
 
+/**
+ * @author Marcel Reich
+ * Thread kümmert sich um eine Eingang und pusht jenach Zeit angebae die Pakte dem Controller zu
+ */
 public class SimulatorThread extends Thread {
 	
+	/**
+	 *  Eingang
+	 */
 	private SimulatorStock stock;
 	
+	/**
+	 * Schnittstelle zum Controller
+	 */
 	private IStockInput input;
 	
 	
@@ -17,12 +27,20 @@ public class SimulatorThread extends Thread {
 	 */
 	private static org.apache.log4j.Logger logger = LogManager.getLogger("Controller");
 	
+	/**
+	 * Konstruktor 
+	 * @param s Eingang
+	 * @param input Schnittstelle
+	 */
 	SimulatorThread(SimulatorStock s, IStockInput input)
 	{
 		this.stock = s; 
 		this.input = input;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Thread#run()
+	 */
 	public void run() {
 
         try {

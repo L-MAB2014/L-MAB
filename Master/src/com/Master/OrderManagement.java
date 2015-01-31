@@ -2,6 +2,10 @@ package com.Master;
 
 import java.util.ArrayList;
 
+/**
+ * @author Marcel Reich
+ * Liste zum Speichern von Order
+ */
 public class OrderManagement extends ArrayList<Order> {
 
     /**
@@ -15,6 +19,13 @@ public class OrderManagement extends ArrayList<Order> {
         this.add(new Order(id, store, exit));
     }
     
+    /**
+     * Übergibt anhand einer ID die Passender Order
+     * @param id
+     * ID der zu sucheneden Oder
+     * @return
+     * Order passen zu der ID
+     */
     public Order getById(String id)
     {
     	for (int i = 0 ; i< this.size(); i++)

@@ -1,7 +1,9 @@
 package com.Master;
 
+
 /**
- *
+ * @author Marcel Reich
+ * Order oder Paket
  *
  */
 public class Order {
@@ -19,12 +21,19 @@ public class Order {
     /**
      * Ziel wo die Lieferung abgeliefert werden soll
      */
-    private String exit_place;
+    private String exit_place;    
     
-    
-    
+    /**
+     * Bot welcher die Order tranportiert
+     */
     private Bot bot;
 
+    /**
+     * Kontsruktor des Order-Objektes
+     * @param id ID der Order
+     * @param store	Eingang der Order
+     * @param exit Ausgang der Order
+     */
     Order(String id, String store, String exit) {
     	this.id = id;
         this.exit_place = exit;
@@ -32,11 +41,20 @@ public class Order {
         this.bot = null;
     }
     
+    /**
+     * Überprüft ob die Order einem Bot zugeteilt ist oder nicht
+     * @return
+     * Resulat od bide Order zugeteilt ist oder nicht
+     */
     public boolean HaveBot()
     {
     	return (bot != null);
     }
     
+    /**
+     * Weißt der Order einen Bot zu
+     * @param bot Zuzuweisender Bot
+     */
     public void SetBot(Bot bot)
     {
     	this.bot = bot;
@@ -44,7 +62,7 @@ public class Order {
     
     
     /**
-     * Gibt die ID der Order zurÃ¼ck
+     * Gibt die ID der Order zurück
      *
      * @return ID der Order
      */
@@ -55,16 +73,16 @@ public class Order {
     /**
      * Setzt die ID der Order
      *
-     * @param id
+     * @param id ID der Order
      */
     public void setId(String id) {
         this.id = id;
     }
 
     /**
-     * Gibt das Lager der Order zurÃ¼ck
+     * Gibt das Lager der Order zurück
      *
-     * @return Lager
+     * @return Lager Lager der Order
      */
     public String getStore_place() {
         return store_place;
@@ -80,9 +98,9 @@ public class Order {
     }
 
     /**
-     * Gibt das Ziel der Order zurÃ¼ck
+     * Gibt das Ziel der Order zurück
      *
-     * @return Ziel
+     * @return Ziel Ziel/Ausgang der Order
      */
     public String getExit_place() {
         return exit_place;
@@ -91,7 +109,7 @@ public class Order {
     /**
      * Setzt das Ziel der Order
      *
-     * @param exit_place
+     * @param exit_place  Zusetzendes Ziel/Ausgang der Order
      */
     public void setExit_place(String exit_place) {
         this.exit_place = exit_place;

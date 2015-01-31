@@ -51,8 +51,14 @@ public class BT {
      */
     private IBot bot;
 
+    /**
+     * Alle gesendeten Nachrichten
+     */
     private List<String> send_messages;
     
+    /**
+     * Alle empfangenen Nachrichten
+     */
     private List<String> input_messages;
     
     BT(String bt_Name, IController controller, IBot bot) {
@@ -98,9 +104,10 @@ public class BT {
     }
 
     /**
-     * √ºberpr√ºft und leitet den Verbindungsaufbau
+     * ‹berpr¸ft und leitet den Verbindungsaufbau
      *
      * @return
+     * Resultat des Verbindungsaufbaus
      */
     public boolean ConnectAgent() {
         try {
@@ -136,7 +143,7 @@ public class BT {
     }
 
     /**
-     * Schlie√ºt die Verbindung zum Bot
+     * Schlieﬂt die Verbindung zum Bot
      */
     public void CloseAgent() {
         try {
@@ -216,7 +223,7 @@ public class BT {
 
 
     /**
-     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung h√ºndelt
+     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung h‰ndelt
      */
     private class InputChannel extends Thread {
 

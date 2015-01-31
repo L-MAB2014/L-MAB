@@ -6,6 +6,10 @@ import java.util.logging.Logger;
 
 import org.apache.log4j.LogManager;
 
+/**
+ * @author Marcel Reich
+ * Bot schnittstelle zum Roboter(Symbolisiert ihn)
+ */
 public class Bot implements IBot {
 
 	/**
@@ -14,12 +18,12 @@ public class Bot implements IBot {
 	private static org.apache.log4j.Logger logger = LogManager.getLogger("Bot");
 	
 	/**
-     * Controller fÃ¼r Informationen
+     * Controller für Informationen
      */
     private IController controller;
 
     /**
-     * Bluetooth-Objekt fÃ¼r die Verbindung
+     * Bluetooth-Objekt für die Verbindung
      */
     private BT bt;
 
@@ -28,11 +32,19 @@ public class Bot implements IBot {
      */
     private boolean connect;
 
-
+    /**
+     * ob der Bot in einem Puffer muss
+     */
     private boolean puffer_modus;
     
+    /**
+     * Ob sich der Bot im Puffer befindet oder nicht
+     */
     private boolean inPuffer;
     
+    /**
+     * Ob ein Puffer reserviert wurde oder nicht
+     */
     private boolean puffer_reserved;
 
     /**
@@ -50,6 +62,9 @@ public class Bot implements IBot {
      */
     private OrderManagement order_management;
     
+    /**
+     * Order welche der Bot bearbeitet
+     */
     private Order order;
 
     /**
@@ -73,11 +88,14 @@ public class Bot implements IBot {
     private String last_checkpoint;
 
     /**
-     * NÃ¤chste Position
+     * Nächste Position
      */
     private String next_checkpoint;
     
     
+    /**
+     * Zugeteielter Puff (falls notwendig)
+     */
     private String puffer;
 
 
@@ -87,8 +105,10 @@ public class Bot implements IBot {
      * zum Bot sendet
      */
     private List<Message> m_waitList;
-    
-    
+       
+    /**
+     * Text wenn sich der Bot in der Warteschlange befindet
+     */
     private List<Message> m_waitListCheckpoint;
     
     /**
@@ -133,7 +153,7 @@ public class Bot implements IBot {
     /**
      * Baut eine Verbindung zum Roboter auf
      *
-     * @return
+     * @return Resultat ob eine Verbindung aufgebaut werden konnte oder nicht
      */
     public boolean Connect() {
 
@@ -166,10 +186,10 @@ public class Bot implements IBot {
 
     }
 
+  
     /**
-     * Nimmt eine neue Order entegen und sendet sie zum Roboter
-     *
-     * @param order Neue order des Bots
+     * Nimmte eine neu Order entgegen
+     * @param order Neue Order
      */
     public void NewOrder(Order order) {
         if(this.order == null)
@@ -202,13 +222,10 @@ public class Bot implements IBot {
 		    
     }
     
-    public void OrderFinish()
-    {
-    	
-    }
-
     /**
-     * Updatet die Position des Bots
+     * Updatet die Posizion des Bots
+     * @param check Aktueller Checkpunkt
+     * @param next_check nächster Checkpunkt
      */
     private void UpdateCheckpoint(String check, String next_check) {
     	logger.info("Bot "+bt_Name+" setzt seine aktuelle Position auf den Checkpunkt  "+check +" und seinenaechste auf "+next_check);
@@ -218,8 +235,11 @@ public class Bot implements IBot {
         this.controller.UpdateMap(this.checkpoint, this.last_checkpoint, this.bt_Name);
     }
 
+
+
     /**
-     * Updatet die Position des Bots
+     * Bot befindet sich im Einang und bekommt die mittgeteilt das dieser aufladen darf
+     * @param check Checkpunkt
      */
     private void Entrance(String check) {
         this.last_checkpoint = this.checkpoint;
@@ -227,13 +247,13 @@ public class Bot implements IBot {
         logger.info("Position des Bots "+bt_Name+" wird auf "+check+" gesetzt");
         this.controller.UpdateMap(this.checkpoint, this.last_checkpoint, this.bt_Name);
         controller.InputConsole((this.bt_Name + " bereit zum Laden"));
-        logger.info("Bot "+bt_Name+" bekommt die genehmigung auf- oder abzuladen");
+        logger.info("Bot "+bt_Name+" bekommt die genehmigung aufzuladen");
         bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_Continue, MasterData.code_Load))));
     }
 
 
     /**
-     * ÃœberprÃ¼ft ob der Bot weiterfahren kann und sendet dies dann dem Roboter zu
+     * Überprüft ob der Bot weiterfahren kann und sendet dies dann dem Roboter zu
      */
     private void CheckAndSendForContinue() {
         if (this.controller.CheckForContinue(checkpoint, next_checkpoint, this)) {
@@ -251,9 +271,10 @@ public class Bot implements IBot {
 
 
     /**
-     * FÃ¼hrt die Aktionen weiter bevor der Bot in die Warteschlange kam
+     * Fährt die Aktionen weiter bevor der Bot in die Warteschlange kam
      *
      * @return
+     * Resultat ob der Bot aus der Warteschlange geholt wurde oder nicht
      */
     public boolean ContinueAfterWaitList() {
         if (this.inWaitList && this.m_waitList != null) {
@@ -289,6 +310,7 @@ public class Bot implements IBot {
      * @see com.Master.IBot#HandleMessageInput(java.lang.String)
      */
     public void HandleMessageInput(String message) {
+    	//Analysiert den Nachrichten eingang
         try
         {
         	if (message != null && message != "") {
@@ -429,12 +451,18 @@ public class Bot implements IBot {
     	
     }
     
+    /**
+     * Sendet dem Bot das Stopp-Signal
+     */
     public void Stop()
     {
     	bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_STOP, MasterData.STOP_CODE))));
     	this.bt.CloseAgent();
     }
     
+    /**
+     * Parkmodus des Bots (Bot hat geparkt)
+     */
     public void Parking()
     {
     	this.last_checkpoint = this.checkpoint;
@@ -444,7 +472,7 @@ public class Bot implements IBot {
     }
 
     /**
-     *
+     * Sendet dem Bot das dieser Parken soll
      */
     public void SendParkPosition() {
         bt.SendMessage(Protokoll.MessageToString((new Message(MasterData.code_ParkPosition, this.park_position))));
@@ -453,7 +481,7 @@ public class Bot implements IBot {
     }
 
     /**
-     * Updatet die Informationen des Bots in der BenutzeroberflÃ¼che (Tabelle)
+     * Updatet die Informationen des Bots in der Benutzeroberfläche (Tabelle)
      */
     public void InfoUpdate() {
     	String auftrag = this.order != null ? this.order.getId() : "-";
@@ -461,11 +489,21 @@ public class Bot implements IBot {
     }
     
     
+    /**
+     * Gitb an ob der Bot einen Order hat,w eclhe er bearbeiten muss oder nicht
+     * @return
+     * Hat der Bot eine Order
+     */
     public boolean HaveOrder()
     {
     	return (order != null);
     }
     
+    /**
+     * Gibt die ID des zurzeit bearbeiten Order zurückgibt
+     * @return
+     * Order ID
+     */
     public String getOrderID()
     {
     	return this.order.getId();
@@ -498,16 +536,31 @@ public class Bot implements IBot {
         return checkpoint;
     }
     
+    /**
+     * Gibt an ob sich der Bot im Puffer befindet
+     * @return
+     * Bot in Puffer oder nicht
+     */
     public boolean IsinPuffer()
     {
     	return this.inPuffer;
     }
     
+    /**
+     * Gibt an ob der Bot einen Puffer reserviert hat
+     * @return
+     * Puffer von Bot reserviert
+     */
     public boolean HavePufferReserved()
     {
     	return this.puffer_reserved;
     }
     
+    /**
+     * Übergibt den Puffer Namen
+     * @return
+     * Name des zugeteilten Puffers
+     */
     public String GetPuffer()
     {
     	return this.puffer;

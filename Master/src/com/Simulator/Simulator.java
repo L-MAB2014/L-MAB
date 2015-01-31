@@ -6,26 +6,70 @@ import java.util.List;
 import com.Master.IStockInput;
 import com.Master.OrderInfo;
 
+/**
+ * @author Jan Bein und Marcel Reich
+ * Simulator Klasse
+ */
 public class Simulator {
+	
+	/**
+	 * Eingang 1
+	 */
 	private  SimulatorStock mStockA;
+	
+	/**
+	 * Eingang 2
+	 */
 	private  SimulatorStock mStockB;
+	
+    /**
+     * Eingang 3
+     */
     private  SimulatorStock mStockC;
     
+    /**
+     * Thread zum Pushen von Aufträgen für Eingang 1
+     */
     private  SimulatorThread tStockA;
+    
+    /**
+     * Thread zum Pushen von Aufträgen für Eingang 2
+     */
     private  SimulatorThread tStockB;
+    
+    /**
+     * Thread zum Pushen von Aufträgen für Eingang 3
+     */
     private  SimulatorThread tStockC;
-    
-    
+       
+    /**
+     * Liste mit den Aufträgen in welcher Reihenfolge sie von Ausgang1 erwartet werden
+     */
     private List<OrderInfo> OrdertoExit1;
 
+	/**
+	 * Liste mit den Aufträgen in welcher Reihenfolge sie von Ausgang2 erwartet werden
+	 */
 	private List<OrderInfo> OrdertoExit2;
     
+    /**
+     * Schnittstelle zum Controller
+     */
     private IStockInput input;
-    
-    
+       
+    /**
+     * Anzahl Aufträge für Eingang 1
+     */
     public int mXCount;
+    
+    /**
+     * Anzahl Aufträge für Eingang 1
+     */
     public int mYCount;
 
+	/**
+	 * @param input
+	 */
 	public Simulator(IStockInput input) {
 		
 		this.input = input;
@@ -40,10 +84,14 @@ public class Simulator {
 		mXCount = 0;	
 	}
 		
+	/**
+	 * Erzeugt einen Auftrag für einen Eingang
+	 * @return
+	 * Neuer Auftrag für ein Eingang
+	 */
 	private StockObjekt getNextPackage() {
 		boolean left = (Math.random() < 0.5); 
 		StockObjekt so;
-	//	if(true)
 		if(left)
 		{
 			so =  new StockObjekt(SimulatorData.key_PU2, mXCount++ );
@@ -57,6 +105,9 @@ public class Simulator {
 		return so;
 	}
 	
+	/**
+	 * Erstelt die Aufträge und Teil sie zu
+	 */
 	public void CreatSimulateData() {
 		
 		mStockA.addObjekt(new StockObjekt(SimulatorData.key_Timeout,((int) (Math.random() * 10))));
@@ -84,6 +135,9 @@ public class Simulator {
 		}
 	}
 	
+	/**
+	 * Startet die Simualtor-Threads, welche die Aufträge dem Controller übergben
+	 */
 	public void StartSimulat()
 	{
 		this.tStockA = new SimulatorThread(this.mStockA, this.input);
@@ -96,6 +150,9 @@ public class Simulator {
 	}
 	
 	
+	/**
+	 * Resetet die Informationen
+	 */
 	public void reset() {
 		mXCount = 0;
 		mYCount = 0;
@@ -104,6 +161,9 @@ public class Simulator {
 		mStockC.clear();
 	}
 	
+	/**
+	 * Stoppt die Eingangs-Threads
+	 */
 	public void Stopp()
 	{
 		this.tStockA.stop();
@@ -111,6 +171,7 @@ public class Simulator {
 		this.tStockC.stop();
 	}
 	
+
     public List<OrderInfo> getOrdertoExit1() {
 		return OrdertoExit1;
 	}
@@ -119,17 +180,4 @@ public class Simulator {
 		return OrdertoExit2;
 	}
 	
-	
-//	public static void main(String[] args) {
-//		Simulator cs = new Simulator();
-//		
-//		cs.CreatSimulateData();
-//		
-//		System.out.println("Eingang A (" + cs.mStockA + ")");
-//
-//		System.out.println("Eingang B (" + cs.mStockB + ")");
-//
-//		System.out.println("Eingang C (" + cs.mStockC + ")");
-//
-//	}
 }

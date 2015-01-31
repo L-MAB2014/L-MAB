@@ -1,12 +1,27 @@
 package com.Simulator;
 
+/**
+ * @author Marcel Reich
+ * Eine Order ensteht aus einem StockObjekt (key1 = X , key2 = 1 , Order = X-1)  
+ */
 public class StockObjekt {
 	
 
+	/**
+	 * Schlüssel
+	 */
 	private char key1;
 	
+	/**
+	 * Wert
+	 */
 	private int key2;
 	
+	/**
+	 * Konstruktor
+	 * @param k1 Schlüssel
+	 * @param k2 ID
+	 */
 	StockObjekt(char k1, int k2)
 	{
 		this.key1=k1;

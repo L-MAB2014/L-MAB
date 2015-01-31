@@ -4,12 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * @author Jan Bein und Marcel Reich
+ * Spiegelt einen Eingang wieder zu wem die Order zugetelt weden
+ */
 public class SimulatorStock {
 	
+	/**
+	 * Liste mit den Aufträgen
+	 */
 	private List<StockObjekt> objekts;
 	
+	/**
+	 * name des Eingangs
+	 */
 	private String name;
 	
+	/**
+	 * Konstruktor
+	 * @param name Name des Iengangs
+	 */
 	public SimulatorStock(String name) {
 		
 		this.name = name;
@@ -37,15 +51,6 @@ public class SimulatorStock {
 	public String getName() {
 		return name;
 	}
-	
-//	public void addFront(String key1, int key2) {
-//		objekts.add(new StockObjekt(key1,key2));
-//	}
-//
-//	public void addBack(String key1, int key2) {
-//		
-//		objekts.add(0, new StockObjekt(key1,key2));
-//	}
 	
 	public void print() {
 		for(int i = 0; i < objekts.size() ; ++i)

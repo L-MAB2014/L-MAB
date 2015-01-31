@@ -14,6 +14,10 @@ import java.util.Map;
 
 import org.apache.log4j.*;
 
+/**
+ * @author Marcel Reich
+ * Blackboard
+ */
 public class Controller implements IController, IStockInput {
 
 	/**
@@ -22,7 +26,7 @@ public class Controller implements IController, IStockInput {
 	private static org.apache.log4j.Logger logger = LogManager.getLogger("Controller");
 	
     /**
-     * Benutzeroberfl√§che
+     * Benutzeroberfl‰che
      */
     private View view;
 
@@ -36,15 +40,18 @@ public class Controller implements IController, IStockInput {
      */
     private Controller controller;
     
+    /**
+     * Simulator um die Order zu generieren
+     */
     private Simulator simulator;
 
     /**
-     * Enth√ºllt alle Checkpoints des Lagers
+     * Enth‰lt alle Checkpoints des Lagers
      */
     private HashMap<String, Checkpoint> checkpoints;
     
     /**
-     * Enth√ºllt alle Eing‰nge des Lagers
+     * Enth‰lt alle Eing‰nge des Lagers
      */
     private Map<String, Stock> stocks;
     
@@ -53,10 +60,9 @@ public class Controller implements IController, IStockInput {
      */
     private Map<String, Exit> exits;
 
-
-
-
-
+    /**
+     * Konstruktor
+     */
     Controller() {
         this.controller = this;
 
@@ -65,7 +71,6 @@ public class Controller implements IController, IStockInput {
         logger.info("Oberflaeche wird geˆffnet und und die Actionlistener gesetzt");
         
         this.view.addNewBotListener(new NewBotListener());
-        this.view.addNewOrderListener(new NewOrderListener());
         this.view.addStoppListener(new StoppListener());
 
         this.view.addSimulationStartListener(new SimulationStartListener());
@@ -120,10 +125,10 @@ public class Controller implements IController, IStockInput {
     }
 
     /**
-     * √úberpr√úft ob ein Bots schon mit dem √ºbergebenen-Namen existiert
+     * ‹berpr¸ft ob ein Bots schon mit dem ‹bergebenen-Namen existiert
      *
      * @param name Name des Bots
-     * @return Ergebnis der √ºberpr√ºfung
+     * @return Ergebnis der ‹berpr¸fung
      */
     public boolean ExitsBot(String name) {
         for (int i = 0; i < this.bots.size(); ++i) {
@@ -157,6 +162,9 @@ public class Controller implements IController, IStockInput {
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see com.Master.IController#SetOnWaitList(java.lang.String, com.Master.Bot)
+     */
     public synchronized void SetOnWaitList(String check, Bot bot) {
     	
     	Checkpoint checkpoint = checkpoints.get(check);
@@ -168,6 +176,14 @@ public class Controller implements IController, IStockInput {
     	}
     }
 
+    /**
+     * ‹berpr¸ft ob eine Bot von einem zum n‰chsten Checkpunkt fahren darf oder nciht
+     * @param checkpoint Checkpunkt des Bots
+     * @param next_checkpoint Ziel-Checkpunkt des Bots
+     * @param bot Bots
+     * @return Ergebnis ob der Bot fahren darf oder nicht
+     * 
+     */
     private synchronized boolean EditCheckpointsForContinue(Checkpoint checkpoint, Checkpoint next_checkpoint, Bot bot) {
     	logger.info("Bot "+ bot.getBt_Name() +" pr¸ft ob Checkpoint "+ next_checkpoint.getName()+"  gesperrt ist");
     	
@@ -179,32 +195,10 @@ public class Controller implements IController, IStockInput {
            
         	if (checkpoint.isBotInWaitList()) {
             	logger.info("Bots in Warteschlange des Checkpunkts  "+ checkpoint.getName());
-                
-//            	if (checkpoint.isStoreOrExit()) {
-//            		
-//                    checkpoint.setClosedBot(null);
-//                    checkpoint.setReservedBot(null);
-//                    
-//                    this.view.UpdateClosedpoint(checkpoint.getName(), false);
-//                    Bot waitBot = checkpoint.getFirstOnWaitList();
-//                    
-//                    if(!waitBot.IsinPuffer())
-//                    {
-//                    	Checkpoint puffer = checkpoints.get(waitBot.GetPuffer());
-//                    	if(puffer != null)
-//                    		puffer.setReservedBot(null);
-//                    }
-//                    
-//                    checkpoint.setReservedBot(waitBot);
-//                    logger.info("Bots "+waitBot.getBt_Name()+" wird aus der Warteschlange des Checkpunkts  "+ checkpoint.getName()+ "geholt!");
-//                    waitBot.ContinueAfterWaitList();
-//                    logger.info("Checkpunkts  "+ checkpoint.getName()+" f¸r Bot "+waitBot.getBt_Name()+" freigeben");
-//                    
-//                } else {
-                	
+              	
                     WorkOffWaitList w = new WorkOffWaitList(checkpoint);
                     w.start();
- //               }
+
             } else {
             	logger.info("Checkpoint "+ next_checkpoint.getName()+ " wird enstperrt (Keiner in der Warteschlange, letzter Bot: "+bot.getBt_Name()+")");
                 
@@ -229,6 +223,9 @@ public class Controller implements IController, IStockInput {
         return false;
     }
 
+    /* (non-Javadoc)
+     * @see com.Master.IController#NextFreePuffer()
+     */
     public synchronized Checkpoint NextFreePuffer() {
         Checkpoint puffer1 = checkpoints.get("PF1");
         Checkpoint puffer2 = checkpoints.get("PF2");
@@ -244,6 +241,9 @@ public class Controller implements IController, IStockInput {
         	return null;
     }
     
+    /* (non-Javadoc)
+     * @see com.Master.IController#TestEntranceForPuffer(java.lang.String, com.Master.Bot)
+     */
     public synchronized boolean TestEntranceForPuffer(String entrance, Bot bot) {
         Checkpoint check = checkpoints.get(entrance);
         if ((check.isClosed() || check.isReserved()) && !check.BotHaveClosesOrReserved(bot))
@@ -257,6 +257,9 @@ public class Controller implements IController, IStockInput {
 
     }
 
+    /* (non-Javadoc)
+     * @see com.Master.IController#ExitReserved(java.lang.String, com.Master.Bot)
+     */
     public synchronized boolean ExitReserved(String exit, Bot bot) {
         
     	logger.info("Checkpoint "+ this.checkpoints.get(exit).getName()+" soll von "+bot.getBt_Name()+" reserviert");
@@ -284,6 +287,9 @@ public class Controller implements IController, IStockInput {
         return false;
     }
     
+    /* (non-Javadoc)
+     * @see com.Master.IController#StoreReserved(java.lang.String, com.Master.Bot)
+     */
     public synchronized boolean StoreReserved(String store, Bot bot) {
     	Stock ex = this.stocks.get(store);
         
@@ -307,6 +313,9 @@ public class Controller implements IController, IStockInput {
         return false;
     }
     
+    /* (non-Javadoc)
+     * @see com.Master.IController#CheckpointReserved(java.lang.String, com.Master.Bot)
+     */
     public synchronized boolean CheckpointReserved(String check, Bot bot) {
         Checkpoint checkpoint = checkpoints.get(check);     
         
@@ -320,10 +329,12 @@ public class Controller implements IController, IStockInput {
         return false;
     }
     
+    /* (non-Javadoc)
+     * @see com.Master.IStockInput#ObjektToStock(java.lang.String, java.lang.String, java.lang.String)
+     */
     public synchronized void ObjektToStock(String id, String stock, String target)
     {
     	Order order = new Order(id,stock,target);
-
 		    	
     	Bot bot = null;
     	for (int i = 0; i < bots.size() && bot == null ; ++i )
@@ -344,11 +355,12 @@ public class Controller implements IController, IStockInput {
     		bot.NewOrder(order);
     	}
     	
-    	view.InputStoreTable(s.getName(), id, target, bot != null ? bot.getBt_Name():"-");
-    	
-    	
+    	view.InputStoreTable(s.getName(), id, target, bot != null ? bot.getBt_Name():"-");   	
     }
     
+    /* (non-Javadoc)
+     * @see com.Master.IController#OrderLoad(com.Master.Order)
+     */
     public synchronized void OrderLoad(Order order)
     {
     	try{
@@ -365,6 +377,9 @@ public class Controller implements IController, IStockInput {
     	}
     }
     
+    /* (non-Javadoc)
+     * @see com.Master.IController#OrderUnload(com.Master.Order, com.Master.Bot)
+     */
     public synchronized void OrderUnload(Order order, Bot bot)
     {
     	try{
@@ -378,6 +393,9 @@ public class Controller implements IController, IStockInput {
 		}
     }
     
+    /* (non-Javadoc)
+     * @see com.Master.IController#NextOrderForBot()
+     */
     public synchronized Order NextOrderForBot()
     {
 	    try{
@@ -394,6 +412,9 @@ public class Controller implements IController, IStockInput {
     	
     }
     
+    /**
+     * Stoppt alle vorhandenen Bots
+     */
     public void Stop()
     {
     	try{
@@ -407,23 +428,10 @@ public class Controller implements IController, IStockInput {
     		logger.info("Stopp : "+e);
     	}
     }
-    
-    
-    
-    
-    
-//    /**
-//     * ActionListener zum Bet√§tigen des Bots Verwalten-Buttons
-//     */
-//    class ControlBotListener implements ActionListener {
-//        public void actionPerformed(ActionEvent e) {
-//       	
-//        	logger.info("Der Button 'Bots Verwalten' wurde betaetigt");
-//        }
-//    }
+
 
     /**
-     * ActionListener zum Bet√§tigen des Neuen Bots -Buttons
+     * ActionListener zum Bet‰tigen des Neuen Bots -Buttons
      */
     class NewBotListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
@@ -459,48 +467,9 @@ public class Controller implements IController, IStockInput {
         }
     }
 
-//    /**
-//     * ActionListener zum Bet√§tigen des Auftrags Verwaltungs-Buttons
-//     */
-//    class ControlOrderListener implements ActionListener {
-//        public void actionPerformed(ActionEvent e) {
-//        	logger.info("Der Button 'Auftrags Verwaltung' wurde betaetigt");
-//        }
-//    }
 
     /**
-     * ActionListener zum Betaetigen des Neuer Auftrag-Buttons
-     */
-    class NewOrderListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-        	
-        	logger.info("Der Button 'Neuer Auftrag' wurde betaetigt");
-        	
-            int store = view.GetStoreSelection();
-            int exit = view.GetExitSelection();
-                       
-            if (store != 0 && exit != 0) {
-//                int id = order_ID++;
-//                logger.info("Es wurde das Lager "+store +" und der Ausgang"+ exit+" ausgew‰hlt!");
-//                Order new_order = new Order(id, store, exit);
-//
-//                if (bots.size() > 0) {
-//                    if (counter >= bots.size()) {
-//                        counter = 0;
-//                    }
-//                    bots.get(counter).NewOrder(new_order);
-//                    counter++;
-//                } else {
-//                    view.InputDialog("Keine Bots vorhanden");
-//                }
-            } else {
-            	logger.info("Es wurde kein Lager und/oder Ausgang  ausgew‰hlt!");
-            }
-        }
-    }
-
-    /**
-     * ActionListener zum Bet√§tigen des Stopp/Buttons
+     * ActionListener zum Bet‰tigen des Stopp/Buttons
      */
     class StoppListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
@@ -511,7 +480,7 @@ public class Controller implements IController, IStockInput {
     }
 
     /**
-     * ActionListener zum Bet√§tigen des Men√ºteintrags "Starten"
+     * ActionListener zum Bet‰tigen des Men¸eintrags "Starten"
      */
     class SimulationStartListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
@@ -536,7 +505,7 @@ public class Controller implements IController, IStockInput {
     }
 
     /**
-     * ActionListener zum Bet√§tigen des Men√ºteintrags "Speichern"
+     * ActionListener zum Bet‰tigen des Men¸eintrags "Speichern"
      */
     class SimulationSpeichernListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
@@ -545,7 +514,7 @@ public class Controller implements IController, IStockInput {
     }
 
     /**
-     * ActionListener zum Bet√§tigen des Men√ºteintrags "Einstellungen"
+     * ActionListener zum Bet‰tigen des Men¸eintrags "Einstellungen"
      */
     class SimulationEinstellungenListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {        	
@@ -556,7 +525,7 @@ public class Controller implements IController, IStockInput {
 
     
     /**
-     * Klasse welche den Nachrichteneingang der Bluetooth-Verbindung h√§ndelt
+     * Klasse welche die Warteschlange eines Checkpunktes h‰ndelt
      */
     private class WorkOffWaitList extends Thread {
         Checkpoint check;
@@ -675,6 +644,12 @@ public class Controller implements IController, IStockInput {
         }
     }
     
+    /**
+     * @author Marcel Reich
+     * 
+     * Klasse zum vergleichen der Eing‰nge (aus welchen Eingang als n‰chstes eine Order abgeholt werden solte)
+     *
+     */
     public class StokComperator implements Comparator <Stock>
     {
     	@Override

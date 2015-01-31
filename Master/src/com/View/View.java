@@ -71,9 +71,9 @@ public class View extends JFrame {
         scrollPane.setBounds(20, 443, 730, 180);
         getContentPane().add(scrollPane);
 
-        this.btn_newOrder = new JButton("Neuer Auftrag");
-        this.btn_newOrder.setBounds(1088, 213, 96, 22);
-        getContentPane().add(this.btn_newOrder);
+//        this.btn_newOrder = new JButton("Neuer Auftrag");
+//        this.btn_newOrder.setBounds(1088, 213, 96, 22);
+//        getContentPane().add(this.btn_newOrder);
 
         this.btn_newBot = new JButton("Neuer Bot");
         this.btn_newBot.setBounds(1033, 17, 147, 22);
@@ -92,34 +92,34 @@ public class View extends JFrame {
         lblName.setBounds(876, 0, 46, 14);
         getContentPane().add(lblName);
 
-        this.store_1 = new JRadioButton("L1");
-        this.store_1.setBounds(883, 213, 39, 23);
-        getContentPane().add(this.store_1);
-
-        this.store_2 = new JRadioButton("L2");
-        this.store_2.setBounds(924, 213, 39, 23);
-        getContentPane().add(this.store_2);
-
-        this.store_3 = new JRadioButton("L3");
-        this.store_3.setBounds(965, 213, 46, 23);
-        getContentPane().add(this.store_3);
-
-        this.grp_store = new ButtonGroup();
-        this.grp_store.add(this.store_1);
-        this.grp_store.add(this.store_2);
-        this.grp_store.add(this.store_3);
-
-        this.exit_1 = new JRadioButton("E1");
-        this.exit_1.setBounds(1009, 213, 39, 23);
-        getContentPane().add(this.exit_1);
-
-        this.exit_2 = new JRadioButton("E2");
-        this.exit_2.setBounds(1050, 213, 39, 23);
-        getContentPane().add(this.exit_2);
-
-        this.grp_exit = new ButtonGroup();
-        this.grp_exit.add(this.exit_1);
-        this.grp_exit.add(this.exit_2);
+//        this.store_1 = new JRadioButton("L1");
+//        this.store_1.setBounds(883, 213, 39, 23);
+//        getContentPane().add(this.store_1);
+//
+//        this.store_2 = new JRadioButton("L2");
+//        this.store_2.setBounds(924, 213, 39, 23);
+//        getContentPane().add(this.store_2);
+//
+//        this.store_3 = new JRadioButton("L3");
+//        this.store_3.setBounds(965, 213, 46, 23);
+//        getContentPane().add(this.store_3);
+//
+//        this.grp_store = new ButtonGroup();
+//        this.grp_store.add(this.store_1);
+//        this.grp_store.add(this.store_2);
+//        this.grp_store.add(this.store_3);
+//
+//        this.exit_1 = new JRadioButton("E1");
+//        this.exit_1.setBounds(1009, 213, 39, 23);
+//        getContentPane().add(this.exit_1);
+//
+//        this.exit_2 = new JRadioButton("E2");
+//        this.exit_2.setBounds(1050, 213, 39, 23);
+//        getContentPane().add(this.exit_2);
+//
+//        this.grp_exit = new ButtonGroup();
+//        this.grp_exit.add(this.exit_1);
+//        this.grp_exit.add(this.exit_2);
         
         JLabel lblBots = new JLabel("Bots:");
         lblBots.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -162,7 +162,7 @@ public class View extends JFrame {
         menuStart = new JMenuItem("Starten");
         mnVorbereitung.add(menuStart);
 
-        menuOeffnen = new JMenuItem("Ã–ffnen");
+        menuOeffnen = new JMenuItem("Öffnen");
         mnVorbereitung.add(menuOeffnen);
 
         menuSpeichern = new JMenuItem("Speichern");

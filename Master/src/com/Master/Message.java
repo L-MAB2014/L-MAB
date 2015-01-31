@@ -1,12 +1,12 @@
 package com.Master;
 
 /**
- * Das Message/Objekt besteht aus einem SchlÃ¼ssel und einem Wert
+ * Das Message/Objekt besteht aus einem Schlüssel und einem Wert
  */
 public class Message {
 
     /**
-     * SchlÃ¼ssel der Message
+     * Schlüssel der Message
      */
     private String key;
 
@@ -21,7 +21,7 @@ public class Message {
     }
 
     /**
-     * Gibt den SchlÃ¼ssel der Message zurÃ¼ck
+     * Gibt den Schlüssel der Message zurück
      *
      * @return SchlÃ¼ssel der Message
      */

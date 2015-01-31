@@ -1,5 +1,10 @@
 package com.Master;
 
+/**
+ * @author Marcel Reich
+ * Interface um die Nachrichten aus dem Inpput Stream dem Bot zu übermitteln
+ *
+ */
 public interface IBot {
 
     /**

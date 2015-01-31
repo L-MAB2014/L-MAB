@@ -9,9 +9,9 @@ import java.util.List;
  * <p/>
  * Das Protokoll sieht wie folgt aus:
  * <p/>
- * Schlüssel : Wert; Schlüssel : Wert; ..... #
+ * Schl�ssel : Wert; Schlüssel : Wert; ..... #
  * <p/>
- * Eine Nachricht wird aufgeteilt in einen Schlüssel und einen Wert, welche
+ * Eine Nachricht wird aufgeteilt in einen Schl�ssel und einen Wert, welche
  * durch einen Doppelpunkt getrennt werden, soll eine weitere Nachricht angefügt
  * werden geschiet dies über einen Semikolon. Am Ende einer kompletten Nachricht
  * wird eine Raute (#) positionert, die das Ende wiederspiegelt.
