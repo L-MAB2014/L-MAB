@@ -2,6 +2,11 @@ package com.marcel.Communication;
 
 import lejos.nxt.ColorSensor.Color;
 
+/**
+ * @author Marcel Reich
+ * Erstellt die Map
+ *
+ */
 public class CreatCheckpoints {
 
     /**

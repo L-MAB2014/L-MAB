@@ -7,46 +7,154 @@ import lejos.util.Delay;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Marcel Reich
+ *
+ */
+/**
+ * @author Marcel
+ *
+ */
 public class Roboter implements IRoboter {
 
+    /**
+     * Wert zur PID-Rechnung
+     */
     float tp = 350;
+    
+    /**
+     * Wert zur PID-Rechnung
+     */
     float light;
+    
+    /**
+     * Wert zur PID-Rechnung
+     */
     float high;
+    
+    /**
+     * Wert zur PID-Rechnung
+     */
     float low;
+    
+    /**
+     * Wert zur PID-Rechnung
+     */
     float offset;
+    
+    /**
+     * Wert zur PID-Rechnung
+     */
     float error;
+    
+    /**
+     * Wert zur PID-Rechnung
+     */
     float turn;
     
+    /**
+     * Wert zur PID-Rechnung
+     */
     float kp = 15;
+    
+    /**
+     * layout
+     */
     private CheckpointList map;
+    
+    /**
+     * Parkposition
+     */
     private Checkpoint park_Position;
+    
+    /**
+     * Akutelle Psotion des Roboters
+     */
     private Checkpoint position;
     
+    /**
+     * Puffer Postion des Puffes (falls notwendig)
+     */
     private Checkpoint puffer_position;
     
+    /**
+     * Farbsensor
+     */
     private ColorSensor colorSensor;
+    
+    /**
+     * Lichtsensor
+     */
     private LightSensor lightSensor;
     
-    
-    
+    /**
+     * Rechter-Antriebsmotor
+     */
     private NXTRegulatedMotor rightMotor;
+    
+    /**
+     * Linker Antriebs-Motor
+     */
     private NXTRegulatedMotor leftMotor;
+    
+    /**
+     * Verbindungsobjekt
+     */
     private BTConnect bt;
+    
+    /**
+     * Auftragsmanager
+     */
     private OrderManagement manager;
+    
+    /**
+     * Ob der Roboter warten muss(Aus Antwort/Freigabe des Leitsandes)
+     */
     private boolean wait;
+    
+    /**
+     * Zeit seit dem letzten Checkpoints
+     */
     private long last_checkpoint;
+    
+    /**
+     * Ob das Pogramm beendet werden soll
+     */
     private boolean IsEnding;
 
+    /**
+     * Ob sich der Roboter im Parkmodus befndet
+     */
     private boolean IsParking;
 
+    /**
+     * Ob dem Roboter ein Parkplatz zugewiesen wurde
+     */
     private boolean InitializePosition;
     
+    /**
+     * Erlaubnis Ware abzuholen
+     */
     private boolean licence_store;
+    
+    /**
+     * Erlaubnis Ware abzuliefern
+     */
     private boolean licence_exit;
     
+    /**Ob der Roboter zum Puffer muss oder nciht
+     * 
+     */
     private boolean toPuffer;
+   
+    /**
+     * Ob sicher Roboter im Puffer befindet oder nicht
+     */
     private boolean inPuffer;
     
+    /**
+     * Ob der Roboter die Hälfte der Strecke erreicht hat
+     */
     private boolean way_check;
 
     Roboter() {
@@ -89,6 +197,9 @@ public class Roboter implements IRoboter {
         Roboter r = new Roboter();
     }
 
+    /**
+     * Zuweisung
+     */
     private void InitializeStart() {
         LCD.clear();
         LCD.drawString("Auf Zuweisung warten!", 0, 1);
@@ -102,6 +213,9 @@ public class Roboter implements IRoboter {
         }
     }
 
+    /**
+     * Startvorgang des Roboters
+     */
     private void drive() {
         try {
 
@@ -142,6 +256,9 @@ public class Roboter implements IRoboter {
 
     }
 
+    /**
+     * Initialiseren der Sensorwerte
+     */
     void init() {
 
         LCD.drawString("HELL: ", 0, 0);
@@ -176,6 +293,10 @@ public class Roboter implements IRoboter {
         LCD.clear();
     }
 
+    /**
+     * Order Abarbeiten
+     * @param order Abzuarbeitene Order
+     */
     private void MakeOrder(Order order) {
         Checkpoint check_store = map.getCheckpoint(order.getStore_place());
         Checkpoint check_exit = map.getCheckpoint(order.getExit_place());
@@ -251,6 +372,9 @@ public class Roboter implements IRoboter {
    
     
     
+    /**
+     * Managen des Parken 
+     */
     private void Parking() {
         LCD.drawString("PARKEN!! ", 0, 2);
 
@@ -280,6 +404,9 @@ public class Roboter implements IRoboter {
 
     }
 
+    /**
+     * Herausfahren aus einem Parkplatz
+     */
     private void Unparking() {
         this.CheckForContinue(new Message(RoboterData.code_Checkpoint, position.getName()),
                 new Message(RoboterData.code_NextCheckpoint, position.getNext_WayCheckpoint().getName()));
@@ -292,6 +419,11 @@ public class Roboter implements IRoboter {
         this.IsParking = false;
     }
 
+    /**
+     * Positon melden und um Freigabe für den Nächsten Checkppoint beim Leitstand bitten 
+     * @param check Aktuelle Positon
+     * @param next_check Nächster Checkpunkt
+     */
     private void CheckForContinue(Message check, Message next_check) {
         List<Message> message = new ArrayList<Message>();
         message.add(check);
@@ -309,6 +441,10 @@ public class Roboter implements IRoboter {
         this.last_checkpoint = System.currentTimeMillis();
     }
 
+    /**
+     * Zuweisung der Parkposition
+     * @param message Parkposition
+     */
     private void SetParkPosition(Message message) {
         Checkpoint check = map.getCheckpoint(message.getValue());
         LCD.drawString("PP: " + message.getValue(), 0, 2);
@@ -320,6 +456,10 @@ public class Roboter implements IRoboter {
         }
     }
 
+    /**
+     * Zu nächsten Farbe farhen
+     * @param farbe Farbe zu der gefahren werden soll
+     */
     private void fahreZu(int farbe) {
 
         leftMotor.forward();
@@ -366,6 +506,9 @@ public class Roboter implements IRoboter {
 
     }
 
+    /**
+     * Auf ein Ok des Leitstands warten
+     */
     private void WaiteForOk() {
         this.wait = false;
         this.leftMotor.stop(true);
@@ -375,6 +518,12 @@ public class Roboter implements IRoboter {
         }
     }
 
+    /**Managet den Roboter innhaler eines Ein- oder Ausgangs
+     * @param entrance Eingang
+     * @param exit	Ausgang (zum herausfahren aus dem lager)
+     * @param order_id Order ID
+     * @param status Status Auf- oder Abladen
+     */
     private void EntranceModus(Checkpoint entrance, Checkpoint exit, String order_id, boolean status) {
         try {
             
@@ -414,6 +563,10 @@ public class Roboter implements IRoboter {
     }
 
     
+    /**
+     * Managet den Start des Roboters
+     * @param check_store Ziel-Eingang des Roboters 
+     */
     private void Start_Modus(Checkpoint check_store)
     {
     	List<Message> message = new ArrayList<Message>();
@@ -448,6 +601,11 @@ public class Roboter implements IRoboter {
         
     }
     
+    /**
+     * Managet den Puffer-Modus des Roboters
+     * @param puffer Zugewiesener Puffer
+     * @param target Ziel-Ausgang
+     */
     private void PufferModus(Checkpoint puffer, Checkpoint target)
     {        
     	if(this.puffer_position == null)
@@ -502,6 +660,9 @@ public class Roboter implements IRoboter {
     	    	
     }
     
+    /**
+     * 90 Grad Drehung nach Links
+     */
     void links90() {
 
         this.leftMotor.stop(true);
@@ -512,6 +673,9 @@ public class Roboter implements IRoboter {
         rightMotor.rotate(450);
     }
     
+    /**
+     * 120 Grad Drehung nach Links
+     */
     void links120() {
 
         this.leftMotor.stop(true);
@@ -520,20 +684,12 @@ public class Roboter implements IRoboter {
         rightMotor.setSpeed(200);
         leftMotor.setSpeed(200);
         rightMotor.rotate(550);
-    	
-//    	this.rightMotor.stop(true);
-//
-//        rightMotor.setSpeed(200);
-//        leftMotor.setSpeed(200);
-//        leftMotor.backward();
-//        rightMotor.forward();
-//
-//        Delay.msDelay(800);
-//        
-//        rightMotor.rotate(80);
     }
     
     
+    /**
+     * 90 Grad Drehung nach Rechts
+     */
     void rechts90() {
 
         this.leftMotor.stop(true);
@@ -544,6 +700,9 @@ public class Roboter implements IRoboter {
         leftMotor.rotate(400);
     }
 
+    /**
+     * 45 Grad Drehung nach links
+     */
     void links45() {
 
         this.leftMotor.stop(true);
@@ -554,6 +713,9 @@ public class Roboter implements IRoboter {
         rightMotor.rotate(360);
     }
     
+    /**
+     * 45 Grad Drehung nach Rechts
+     */
     void rechts45() {
 
         this.leftMotor.stop(true);
@@ -564,6 +726,9 @@ public class Roboter implements IRoboter {
         leftMotor.rotate(360);
     }
 
+    /**
+     * 180 Grad Drehung
+     */
     void turn180() {
 
         this.leftMotor.stop(true);
@@ -580,12 +745,20 @@ public class Roboter implements IRoboter {
     }
     
     
+    /**
+     * Überprüft ob man sich auf kreuzung zum Puffer befindet 
+     * @return
+     * Ergebnis
+     */
     private boolean IsOnPuffer()
     {
     	String check = this.position.getName();
     	return (check.equals("C1") || check.equals("C2") || check.equals("C3"));
     }
 
+    /* (non-Javadoc)
+     * @see com.marcel.Communication.IRoboter#InputMessage(java.lang.String)
+     */
     public void InputMessage(String message) {
         LCD.drawString("N: " + message, 0, 0);
         List<Message> list = Protokoll.StringToMessage(message);

@@ -1,5 +1,11 @@
 package com.marcel.Communication;
 
+/**
+ * @author Marcel Reich
+ * 
+ * Order/Paket
+ *
+ */
 public class Order {
 
 	 /**
@@ -17,6 +23,12 @@ public class Order {
      */
     private String exit_place;
 
+    /**
+     * Kontsruktor des Order-Objektes
+     * @param id ID der Order
+     * @param store	Eingang der Order
+     * @param exit Ausgang der Order
+     */
     Order(String id, String store, String exit) {
         this.id = id;
         this.exit_place = exit;
@@ -36,6 +48,7 @@ public class Order {
      * Setzt die ID der Order
      *
      * @param id
+     * ID der Order
      */
     public void setId(String id) {
         this.id = id;
@@ -54,6 +67,7 @@ public class Order {
      * Setzt das Lager der Order
      *
      * @param store_place
+     * Eingang der Order (für Ware Abholung)
      */
     public void setStore_place(String store_place) {
         this.store_place = store_place;
@@ -72,6 +86,7 @@ public class Order {
      * Setzt das Ziel der Order
      *
      * @param exit_place
+     * Ziel der Order
      */
     public void setExit_place(String exit_place) {
         this.exit_place = exit_place;

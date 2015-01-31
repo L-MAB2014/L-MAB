@@ -8,19 +8,48 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+/**
+ * @author Marcel Reich
+ * 
+ * Bluetooth-Verbindung
+ *
+ */
 public class BTConnect {
 
+    /**
+     * Zeit bis eine Verbindung getrennt wird
+     */
     private final int disconnect_time = 5000;
 
 
+    /**
+     * Verbindungs-Objekt
+     */
     private BTConnection btc;
+    
+    /**
+     * Stream für den Nachrichteneingang
+     */
     private DataInputStream dis;
+    
+    /**
+     * Stream für den Nachrichtenausgang
+     */
     private DataOutputStream dos;
 
+    /**
+     * Thread zum verwalten der Nachrichteneingänge
+     */
     private InputChannel input;
 
+    /**
+     * Status der Verbindung
+     */
     private boolean isConnect;
 
+    /**
+     * Schnittstelle um die Nachirchteneingänge weiterzugegben
+     */
     private IRoboter roboter;
 
     BTConnect(IRoboter robo) {
@@ -29,6 +58,10 @@ public class BTConnect {
     }
 
 
+    /**
+     * Startet die Kommunikationsverwaltung
+     * @return
+     */
     public boolean Connection() {
         try {
             LCD.drawString("WAIT..", 0, 1);
@@ -51,6 +84,9 @@ public class BTConnect {
 
     }
 
+    /**
+     * Schließt die verbinung zum Leitstand
+     */
     public void Close() {
         try {
             this.input.CloseInput();
@@ -66,6 +102,9 @@ public class BTConnect {
         }
     }
 
+    /**
+     * Resetet die Informationen für eine Verbindung
+     */
     private void ResetForNewStart() {
         this.input = null;
         this.btc = null;
@@ -74,6 +113,10 @@ public class BTConnect {
     }
 
 
+    /**
+     * Sendet ine Nachricht zum Leitstand
+     * @param m Zu sendene Nachricht
+     */
     public synchronized void SendPosition(String m) {
         try {
             m += "#";
@@ -86,6 +129,11 @@ public class BTConnect {
     }
 
 
+    /**
+     * @author Marcel Reich
+     * thread zum Verwaltuen des Nachrichteneingangs
+     *
+     */
     private class InputChannel extends Thread {
 
         private String message = "";
@@ -96,6 +144,9 @@ public class BTConnect {
             disconnect = false;
         }
 
+        /* (non-Javadoc)
+         * @see java.lang.Thread#run()
+         */
         public void run() {
 
             try {

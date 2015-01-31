@@ -1,7 +1,9 @@
 package com.marcel.Communication;
 
+
 /**
- *
+ * @author Marcel Reich
+ * Checkpunkt
  *
  */
 public class Checkpoint {
@@ -13,12 +15,12 @@ public class Checkpoint {
     private String name;
 
     /**
-     * Nï¿½chster Checkpunkt auf dem normalen Weg
+     * Nächster Checkpunkt auf dem normalen Weg
      */
     private Checkpoint next_WayCheckpoint;
 
     /**
-     * Nï¿½chstes mï¿½gliches Lager, Parkplatz oder Puffer
+     * Nächstes mögliches Lager, Parkplatz oder Puffer
      */
     private Checkpoint next_OtherCheckpoint;
 
@@ -28,12 +30,12 @@ public class Checkpoint {
     private Checkpoint previous_WayCheckpoint;
 
     /**
-     * Mï¿½gliches vorheriges Lager, Parkplatz oder Puffer
+     * Mögliches vorheriges Lager, Parkplatz oder Puffer
      */
     private Checkpoint previous_OtherCheckpoint;
 
     /**
-     * Enthï¿½lkt die FDarbe des Checkpoints
+     * Enthält die Farbe des Checkpoints
      */
     private int color;
 
@@ -50,10 +52,10 @@ public class Checkpoint {
 
 
     /**
-     * Setzt die nï¿½chsten Checkpunkte des Checkpunktes
+     * Setzt die nächsten Checkpunkte des Checkpunktes
      *
-     * @param next_WayCheckpoint   Nï¿½chster Checkpunkt der sich auf dem Weg befindet
-     * @param next_OtherCheckpoint Nï¿½chster Checkpunkt der als Lager,Puffer oder Parkplatz dient
+     * @param next_WayCheckpoint   Nächster Checkpunkt der sich auf dem Weg befindet
+     * @param next_OtherCheckpoint Nächster Checkpunkt der als Lager,Puffer oder Parkplatz dient
      */
     public void setNextCheckpoints(Checkpoint next_WayCheckpoint, Checkpoint next_OtherCheckpoint) {
         this.next_WayCheckpoint = next_WayCheckpoint;
@@ -72,6 +74,11 @@ public class Checkpoint {
     }
 
 
+    /**
+     * Gibt die Farbe des Checkpunktes an
+     * @return
+     * Farbe des Checkpunktes
+     */
     public int getColor() {
         return color;
     }
@@ -80,7 +87,7 @@ public class Checkpoint {
     /**
      * Gibt den Namen des Checkunktes an
      *
-     * @return
+     * @return Name des Checkpunktes
      */
     public String getName() {
         return name;
@@ -98,7 +105,7 @@ public class Checkpoint {
 
 
     /**
-     * Gibt den naechsten Checkpunkt Parkplatz & Puffer usw. zurueck
+     * Gibt den naechsten Checkpunkt Parkplatz und Puffer usw. zurueck
      *
      * @return naechster Checkpunkt(Anderer)
      */
@@ -118,7 +125,7 @@ public class Checkpoint {
 
 
     /**
-     * Gibt den vorheriger Checkpunkt Parkplatz & Puffer usw. zurueck
+     * Gibt den vorheriger Checkpunkt Parkplatz und Puffer usw. zurueck
      *
      * @return vorheriger Checkpunkt(Anderer)
      */
